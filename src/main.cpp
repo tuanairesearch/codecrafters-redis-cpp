@@ -56,8 +56,8 @@ int main(int argc, char **argv) {
 
   std::cout << "Client connected\n";
   
-  const *char respond = "+PONG\r\n";
-  send(client_fd,respond,strlen(respond),0)
+  const char* respond = "+PONG\r\n";
+  send(client_fd,respond,strlen(respond),0);
   close(client_fd);
   close(server_fd);
 
