@@ -8,5 +8,8 @@
 
 set -e # Exit on failure
 
-cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
-cmake --build ./build
+export VCPKG_ROOT=~/vcpkg
+cd ~/Desktop/Redis/codecrafters-redis-cpp
+
+cmake -B build -S . -G Ninja -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
+cmake --build build
