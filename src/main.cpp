@@ -53,11 +53,30 @@ int main(int argc, char **argv) {
   // Uncomment the code below to pass the first stage
   // 
   int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, (socklen_t*)&client_addr_len);
-
   std::cout << "Client connected\n";
   
-  const char* respond = "+PONG\r\n";
-  send(client_fd,respond,strlen(respond),0);
+  // Initiate neccesary variables
+  char buffer[1024];
+
+  // Handle in loop to keep connect alive after a request
+  while(true)
+  {
+    int size_of_buffer = recv(client_fd, buffer, sizeof(buffer),0);
+    if(size_of_buffer < 0) {
+      std::cout << "Client discoonedted!" << std::endl; 
+      break;
+    }
+
+    if(size_of_buffer == 0)
+    {
+      perror("recv");
+      break;
+    }
+
+    std::cout << buffer << std::endl;
+    send(client_fd,"+PONG\r\n",sizeof("+PONG\r\n"),0);
+
+  }
   close(client_fd);
   close(server_fd);
 
