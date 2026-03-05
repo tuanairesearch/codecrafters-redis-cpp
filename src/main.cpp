@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
   
   // Initiate neccesary variables
   char buffer[1024];
-
+  const char *response = "+PONG\r\n";
   // Handle in loop to keep connect alive after a request
   while(true)
   {
@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     }
 
     std::cout << buffer << std::endl;
-    send(client_fd,"+PONG\r\n",sizeof("+PONG\r\n"),0);
+    send(client_fd,"respond",strlen(response),0);
 
   }
   close(client_fd);
