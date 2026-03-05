@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     }
 
     std::cout << buffer << std::endl;
-    send(client_fd,"respond",strlen(response),0);
+    send(client_fd,respond,strlen(response),0);
 
   }
   close(client_fd);
