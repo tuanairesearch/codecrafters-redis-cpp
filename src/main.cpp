@@ -7,6 +7,32 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <vector>
+
+
+
+void handleClient(int &client_fd)
+{
+  // Initiate neccesary variables
+  char buffer[1024];
+  const char *response = "+PONG\r\n";
+  // Handle in loop to keep connect alive after a request
+  
+  int size_of_buffer = recv(client_fd, buffer, sizeof(buffer),0);
+  if(size_of_buffer < 0) {
+    std::cout << "Client discoonedted!" << std::endl; 
+  }
+
+  if(size_of_buffer == 0)
+  {
+    perror("recv");
+  }
+
+  std::cout << buffer << std::endl;
+  send(client_fd,response,strlen(response),0);
+
+}
+
 
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
@@ -52,32 +78,56 @@ int main(int argc, char **argv) {
 
   // Uncomment the code below to pass the first stage
   // 
-  int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, (socklen_t*)&client_addr_len);
-  std::cout << "Client connected\n";
-  
-  // Initiate neccesary variables
-  char buffer[1024];
-  const char *response = "+PONG\r\n";
-  // Handle in loop to keep connect alive after a request
+
+  char* buffer[1024];
+  std::vector<int> client_fd;
+  int max_fd = 0;
   while(true)
   {
-    int size_of_buffer = recv(client_fd, buffer, sizeof(buffer),0);
-    if(size_of_buffer < 0) {
-      std::cout << "Client discoonedted!" << std::endl; 
-      break;
-    }
+    fd_set readfds; //fds = file descriptors
+    FD_ZERO(&readfds);
 
-    if(size_of_buffer == 0)
+    FD_SET(server_fd, &readfds);
+    max_fd = server_fd;
+    for(auto x:client_fd)
     {
-      perror("recv");
-      break;
+      FD_SET(x, &readfds);
+      max_fd = std::max(max_fd,x);
     }
-
-    std::cout << buffer << std::endl;
-    send(client_fd,response,strlen(response),0);
-
+    int retval; // retval = return value
+    retval = select(max_fd+1, &readfds, NULL, NULL, NULL);
+    if(retval < 0)
+    {
+      perror("retval: ");
+    }
+    else
+    {
+      std::cout << retval << std::endl;
+    }
+    // if has new client
+    if(FD_ISSET(server_fd, &readfds))
+    {
+      std::cout << "Has new client" << std::endl;
+      client_fd.push_back(accept(server_fd,(struct sockaddr*)&client_addr, (socklen_t*)&client_addr_len));
+    }
+    // if client sends request
+    for(auto client:client_fd)
+    {
+      if(FD_ISSET(client, &readfds))
+      {
+        std::cout << "Get data from:" << std::endl;
+        std::cout << client << std::endl;
+        handleClient(client);
+      }
+    }
   }
-  close(client_fd);
+
+  //int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, (socklen_t*)&client_addr_len);
+  //std::cout << "Client id " <<client_fd << " connected\n";
+  //handleClient(client_fd);
+
+  for(auto x:client_fd)
+    close(x);
   close(server_fd);
 
   return 0;
