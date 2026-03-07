@@ -26,11 +26,11 @@ void handleClient(int &client_fd)
   if(size_of_buffer == 0)
   {
     perror("recv");
+    close(client_fd);
   }
 
   std::cout << buffer << std::endl;
   send(client_fd,response,strlen(response),0);
-  client_fd = -1;
 }
 
 
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
   }
   
   struct sockaddr_in client_addr;
-  int client_addr_len = sizeof(client_addr);
+  socklen_t client_addr_len = sizeof(client_addr);
   std::cout << "Waiting for a client to connect...\n";
 
   // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
   // Uncomment the code below to pass the first stage
   // 
 
-  char* buffer[1024];
+  char buffer[1024];
   std::vector<int> client_fd;
   int max_fd = 0;
   while(true)
@@ -94,6 +94,8 @@ int main(int argc, char **argv) {
       FD_SET(x, &readfds);
       max_fd = std::max(max_fd,x);
     }
+
+    std::cout << std::endl;
     int retval; // retval = return value
     retval = select(max_fd+1, &readfds, NULL, NULL, NULL);
     if(retval < 0)
@@ -108,15 +110,21 @@ int main(int argc, char **argv) {
     if(FD_ISSET(server_fd, &readfds))
     {
       std::cout << "Has new client" << std::endl;
+      socklen_t client_addr_len = sizeof(client_addr);
       client_fd.push_back(accept(server_fd,(struct sockaddr*)&client_addr, (socklen_t*)&client_addr_len));
     }
     // if client sends request
+    std::cout << "Client FD: ";
+    for(auto x:client_fd) std::cout << x << " ";
+    std::cout << std::endl;
     for(auto client:client_fd)
     {
-      if(FD_ISSET(client, &readfds) && client >= 0)
+      if(FD_ISSET(client, &readfds))
       {
+        //char* response = "+PONG\r\n";
         std::cout << "Get data from:" << std::endl;
         std::cout << client << std::endl;
+        //send(client,response,strlen(response),0);
         handleClient(client);
       }
     }
@@ -127,8 +135,6 @@ int main(int argc, char **argv) {
   //std::cout << "Client id " <<client_fd << " connected\n";
   //handleClient(client_fd);
 
-  for(auto x:client_fd)
-    close(x);
   close(server_fd);
 
   return 0;
