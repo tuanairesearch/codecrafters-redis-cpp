@@ -30,8 +30,7 @@ void handleClient(int &client_fd)
 
   std::cout << buffer << std::endl;
   send(client_fd,response,strlen(response),0);
-  close(client_fd);
-
+  client_fd = -1;
 }
 
 
@@ -114,7 +113,7 @@ int main(int argc, char **argv) {
     // if client sends request
     for(auto client:client_fd)
     {
-      if(FD_ISSET(client, &readfds))
+      if(FD_ISSET(client, &readfds) && client >= 0)
       {
         std::cout << "Get data from:" << std::endl;
         std::cout << client << std::endl;
