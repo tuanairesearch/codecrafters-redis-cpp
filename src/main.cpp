@@ -30,6 +30,7 @@ void handleClient(int &client_fd)
 
   std::cout << buffer << std::endl;
   send(client_fd,response,strlen(response),0);
+  close(client_fd);
 
 }
 
@@ -120,6 +121,7 @@ int main(int argc, char **argv) {
         handleClient(client);
       }
     }
+    std::cout << std::endl;
   }
 
   //int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, (socklen_t*)&client_addr_len);
