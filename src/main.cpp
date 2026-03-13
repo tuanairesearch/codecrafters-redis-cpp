@@ -11,6 +11,31 @@
 
 //void handleEcho(std::string)
 
+void showRAW(std::string s)
+{
+  if(s.length() != 0)
+  {
+    for(char c:s)
+    {
+      std::cout << "char -> ";
+      if(c == '\n')
+        std::cout << "\\n";
+      else if(c == '\r')
+        std::cout << "\\r";
+      else if(c == '\0')
+        std::cout << "\\0";
+      else 
+        std::cout << c;
+        std::cout << " <- char" << std::endl;
+    }
+  }
+  else
+  {
+    std::cout << "Nothing to show!" << std::endl;
+  }
+    
+}
+
 std::string handleBulkString(const std::string s, int& str_pos)
 {
   // Input form
@@ -118,7 +143,12 @@ std::vector<std::string> handleArray(const std::string s, int& str_pos)
 
 std::string handleOutput(std::string s)
 {
-  std::string outp = "$" + s.length() + std::string("\r\n") + s + "\r\n";
+  //std::string len = ;
+  std::string outp =  "$" + std::to_string(s.length()) + "\r\n" + s + "\r\n";
+  //std::cout << std::endl;
+  //std::cout <<"Output handled: " << outp << std::endl;
+  //std::cout << std::endl;
+  //showRAW(outp);
   return outp;
 }
 
@@ -150,7 +180,7 @@ void handleInput(const std::string &s, int& client_fd)
       inp_arr[1] = handleOutput(inp_arr[1]);
       char result[inp_arr[1].length()+1];
       strcpy(result, inp_arr[1].c_str());
-      std::cout << "result = " << result << std::endl;
+      std::cout << "result = " << inp_arr[1] << std::endl;
       send(client_fd, result, strlen(result),0);
     }
     std::cout << "Checked" << std::endl;
@@ -158,30 +188,7 @@ void handleInput(const std::string &s, int& client_fd)
 }
 
 
-void showRAW(std::string s)
-{
-  if(s.length() != 0)
-  {
-    for(char c:s)
-    {
-      std::cout << "char -> ";
-      if(c == '\n')
-        std::cout << "\\n";
-      else if(c == '\r')
-        std::cout << "\\r";
-      else if(c == '\0')
-        std::cout << "\\0";
-      else 
-        std::cout << c;
-        std::cout << " <- char" << std::endl;
-    }
-  }
-  else
-  {
-    std::cout << "Nothing to show!" << std::endl;
-  }
-    
-}
+
 
 
 
