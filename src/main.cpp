@@ -216,7 +216,7 @@ void handleClient(int &client_fd) {
     //showRAW(str_buffer);
     handleInput(str_buffer, client_fd);
     std::cout << "End check input" << std::endl;
-    send(client_fd, response, strlen(response), 0);
+    //send(client_fd, response, strlen(response), 0);
   }
   
   
