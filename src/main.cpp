@@ -171,9 +171,6 @@ void handleInput(const std::string &s, int& client_fd)
   {
     //std::cout << "Check string arr" << std::endl;
     inp_arr = handleArray(s, str_pos);
-    //for(auto x:inp_arr)
-      //std::cout << x << std::endl;
-    //std::cout << "Check end" << std::endl;
 
     if(toLowerStr(inp_arr[0]) == "echo")
     {
@@ -181,6 +178,11 @@ void handleInput(const std::string &s, int& client_fd)
       char result[inp_arr[1].length()+1];
       strcpy(result, inp_arr[1].c_str());
       std::cout << "result = " << inp_arr[1] << std::endl;
+      send(client_fd, result, strlen(result),0);
+    }
+    else if(toLowerStr(inp_arr[0]) == "ping")
+    {
+      char* result = "+PONG\r\n";
       send(client_fd, result, strlen(result),0);
     }
     std::cout << "Checked" << std::endl;
