@@ -150,7 +150,7 @@ void handleInput(const std::string &s, int& client_fd)
       char result[inp_arr[1].length()+1];
       strcpy(result, inp_arr[1].c_str());
       std::cout << "result = " << result << std::endl;
-      //send(client_fd, result, strlen(result),0);
+      send(client_fd, result, strlen(result),0);
     }
     std::cout << "Checked" << std::endl;
   }
@@ -208,7 +208,7 @@ void handleClient(int &client_fd) {
     //showRAW(str_buffer);
     handleInput(str_buffer, client_fd);
     std::cout << "End check input" << std::endl;
-    //send(client_fd, response, strlen(response), 0);
+    send(client_fd, response, strlen(response), 0);
   }
   
   
