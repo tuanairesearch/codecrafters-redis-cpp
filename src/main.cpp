@@ -116,9 +116,10 @@ std::vector<std::string> handleArray(const std::string s, int& str_pos)
   return vec_str;
 }
 
-void handleOutput(std::string s)
+std::string handleOutput(std::string s)
 {
   std::string outp = "$" + s.length() + std::string("\r\n") + s + "\r\n";
+  return outp;
 }
 
 std::string toLowerStr(std::string s)
@@ -146,7 +147,7 @@ void handleInput(const std::string &s, int& client_fd)
 
     if(toLowerStr(inp_arr[0]) == "echo")
     {
-      inp_arr[1] = "+" + inp_arr[1] +"\r\n";
+      inp_arr[1] = handleOutput(inp_arr[1]);
       char result[inp_arr[1].length()+1];
       strcpy(result, inp_arr[1].c_str());
       std::cout << "result = " << result << std::endl;
