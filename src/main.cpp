@@ -118,7 +118,7 @@ std::vector<std::string> handleArray(const std::string s, int& str_pos)
 
 void handleOutput(std::string s)
 {
-  std::string outp = "+" + s + "\r\n";
+  std::string outp = "$" + s.length() + std::string("\r\n") + s + "\r\n";
 }
 
 std::string toLowerStr(std::string s)
