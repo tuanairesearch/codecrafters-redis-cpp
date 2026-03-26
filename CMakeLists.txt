@@ -10,7 +10,8 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 find_package(asio CONFIG REQUIRED)
 
-add_executable(redis ${SOURCE_FILES})
+add_executable(redis ${SOURCE_FILES}
+        src/main.cpp)
 
 target_link_libraries(redis PRIVATE asio asio::asio)
 target_link_libraries(redis PRIVATE Threads::Threads)

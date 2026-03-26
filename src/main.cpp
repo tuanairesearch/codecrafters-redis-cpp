@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <vector>
 
-//void handleEcho(std::string)
+//void handleEcho(std::string)S
 
 void showRAW(std::string s)
 {
@@ -188,9 +188,6 @@ void handleInput(const std::string &s, int& client_fd)
     std::cout << "Checked" << std::endl;
   }
 }
-
-
-
 
 
 
