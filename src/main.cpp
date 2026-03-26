@@ -194,7 +194,7 @@ void handleInput(const std::string &s, int& client_fd)
 
 
 
-void handleClient(int &client_fd) {
+bool handleClient(int &client_fd) {
   // Initiate neccesary variables
   char buffer[1024];
   const char *response = "+PONG\r\n";
@@ -202,14 +202,16 @@ void handleClient(int &client_fd) {
 
   int size_of_buffer = recv(client_fd, buffer, sizeof(buffer), 0);
   if (size_of_buffer < 0) {
-    std::cout << "Client discoonedted!" << std::endl;
+    perror("recv");
+    return false;
   }
 
   if (size_of_buffer == 0) {
-    perror("recv");
-    close(client_fd);
+    std::cout << "Client discoonedted!" << std::endl;
+    return false;
   }
-  if(size_of_buffer >= 0)
+
+  if(size_of_buffer > 0)
   {
     std::cout << "size_of_buffer: " << size_of_buffer << std::endl;
     std::string str_buffer(buffer, size_of_buffer);
@@ -220,6 +222,7 @@ void handleClient(int &client_fd) {
     std::cout << "End check input" << std::endl;
     //send(client_fd, response, strlen(response), 0);
   }
+  return true;
   
   
 }
@@ -307,21 +310,33 @@ int main(int argc, char **argv) {
     for (auto x : client_fd)
       std::cout << x << " ";
     std::cout << std::endl;
-    for (auto client : client_fd) {
+    int client;
+    for (int i = 0; i < client_fd.size();) 
+    {
+      client = client_fd[i];
       if (FD_ISSET(client, &readfds)) {
         // char* response = "+PONG\r\n";
 
         std::cout << "Get data from:" << std::endl;
         std::cout << client << std::endl;
-        handleClient(client);
+        bool stil_alive = handleClient(client);
+        if(!stil_alive)
+        {
+          client_fd.erase(client_fd.begin()+i);
+          close(client);
+        }
+        else
+        {
+          i++;
+        }
+      }
+      else
+      {
+        i++;
       }
     }
     std::cout << std::endl;
   }
-
-  // int client_fd = accept(server_fd, (struct sockaddr*)&client_addr,
-  // (socklen_t*)&client_addr_len); std::cout << "Client id " <<client_fd << "
-  // connected\n"; handleClient(client_fd);
 
   close(server_fd);
 
