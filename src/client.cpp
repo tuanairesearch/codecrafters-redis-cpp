@@ -11,6 +11,7 @@
 #include <netdb.h>
 #include <string>
 #include <sys/socket.h>
+#include <unordered_map>
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>

@@ -8,7 +8,7 @@
 #include <iostream>
 #include <vector>
 
-std::string handleOutput(std::string s);
+std::string handleOutput(std::string &s);
 std::string toLowerStr(std::string s);
 void handleInput(const std::string &s, int& client_fd);
 std::string toLowerStr(std::string s);

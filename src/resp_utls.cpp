@@ -94,8 +94,7 @@ std::string handleBulkString(const std::string s, int& str_pos)
   }
 }
 
-std::vector<std::string> handleArray(const std::string s, int& str_pos)
-{
+std::vector<std::string> handleArray(const std::string s, int& str_pos) {
   // Input form
   // *<number_of_elements>\r\n<element_1>\r\n<element_2>\r\n...
   // ^
@@ -134,5 +133,10 @@ std::vector<std::string> handleArray(const std::string s, int& str_pos)
   }
 
   // Suppose we only handle a string
+  std::cout << "----------- string got ---------- " << std::endl;
+  for (auto x:vec_str) {
+    std::cout << x << std::endl;
+  }
+  std::cout << "----------- string end ---------- " << std::endl;
   return vec_str;
 }
