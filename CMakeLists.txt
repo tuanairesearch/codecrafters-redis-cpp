@@ -14,7 +14,6 @@ add_executable(redis ${SOURCE_FILES}
         src/main.cpp
         src/server.cpp
         src/server.h
-        src/client.cpp
         src/client.h
         src/resp_utls.cpp
         src/resp_utls.h
