@@ -113,7 +113,7 @@ void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
                 send_resp("-Out of range\r\n",client_fd);
                 return;
             }
-            std::cout << "Name: " << inp_arr[1] <<" Value: " << temp.value << " time_expired: " << temp.expired_time;
+            //std::cout << "Name: " << inp_arr[1] <<" Value: " << temp.value << " time_expired: " << temp.expired_time;
             client_data[client_fd].insert({inp_arr[1], temp});
             send_resp("+OK\r\n",client_fd);
         }
