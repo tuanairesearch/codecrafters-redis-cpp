@@ -15,6 +15,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+
+#include "global.h"
+
 bool handleClient(int &client_fd) {
     // Initiate neccesary variables
     char buffer[1024];
@@ -29,6 +32,7 @@ bool handleClient(int &client_fd) {
 
     if (size_of_buffer == 0) {
         std::cout << "Client discoonedted!" << std::endl;
+        client_data.erase(client_fd);
         return false;
     }
 

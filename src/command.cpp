@@ -59,8 +59,13 @@ void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
     if (check == 2) {
         std::cout << "\"" << inp_arr[1] << "\"" << std::endl;
         if (client_data[client_fd].contains(inp_arr[1])) {
+
+            // Check has_expired
+            // If has_expired == false -> show variable
+            // If has_expired == true -> check if now() < expired_time -> show variable
+
             bool check_valid = ((client_data[client_fd][inp_arr[1]].has_expired == true
-                && std::chrono::steady_clock::now() < client_data[client_fd][inp_arr[1]].expired_time)
+                && std::chrono::steady_clock::now() <= client_data[client_fd][inp_arr[1]].expired_time)
                 || client_data[client_fd][inp_arr[1]].has_expired == false);
             if (check_valid) {
                 std::string s = handleOutput(client_data[client_fd][inp_arr[1]].value);
@@ -69,6 +74,13 @@ void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
                 send(client_fd,result,strlen(result),0);
             }
             else {
+
+                // if variable expired -> delete it too (this is call lazy check)
+
+                if ((client_data[client_fd][inp_arr[1]].has_expired == true
+                && std::chrono::steady_clock::now() > client_data[client_fd][inp_arr[1]].expired_time)) {
+                    client_data[client_fd].erase(inp_arr[1]);
+                }
                 send_resp("$-1\r\n",client_fd);
             }
         }
@@ -113,7 +125,6 @@ void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
                 send_resp("-Out of range\r\n",client_fd);
                 return;
             }
-            //std::cout << "Name: " << inp_arr[1] <<" Value: " << temp.value << " time_expired: " << temp.expired_time;
             client_data[client_fd].insert({inp_arr[1], temp});
             send_resp("+OK\r\n",client_fd);
         }
