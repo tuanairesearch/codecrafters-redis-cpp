@@ -7,5 +7,4 @@
 #include <vector>
 #include <unordered_map>
 
-std::vector<std::unordered_map<std::string, std::string>> variable(10);
-
+std::unordered_map<int,std::unordered_map<std::string, data>> client_data;
