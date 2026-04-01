@@ -184,8 +184,7 @@ void handle_rpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,
 // ------------ Command for catching error -----------------
 
 void handle_unknown_cmd(int& client_fd) {
-    char result[] = "-Unknown command\r\n";
-    send(client_fd, result, strlen(result),0);
+    send_resp_string("-Unknown command\r\n", client_fd);
 }
 
 
