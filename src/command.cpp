@@ -27,15 +27,34 @@ std::string toLowerStr(std::string s)
     return s;
 }
 // -------- Helper -------------
+template <typename T>
+void send_resp_int(T num, int& client_fd) {
+    std::string s = ":" + std::to_string(num) + "\r\n";
+    send(client_fd, s.c_str(), s.size(),0);
+}
 
-void send_resp(const char *message, int& client_fd) {
+void send_resp_string(const char *message, int& client_fd) {
     send(client_fd, message, strlen(message),0);
 }
+
+// --------- Checking system -----------------
+
+bool check_valid_varname(std::string& s) {
+    if (s.length() > 0) {
+        if ((s[0] >= 'a' && s[0] <= 'z') || (s[0] >= 'A' && s[0] <= 'Z') || (s[0] = '_'))
+            return true;
+        else
+            return false;
+    }
+    else
+        return false;
+}
+
 
 // ----------- Command -----------------------
 
 void handle_ping_cmd(int& client_fd) {
-    send_resp("+PONG\r\n", client_fd);
+    send_resp_string("+PONG\r\n", client_fd);
 }
 
 void handle_echo_cmd(std::vector<std::string> &inp_arr, int& client_fd) {
@@ -50,7 +69,7 @@ void handle_echo_cmd(std::vector<std::string> &inp_arr, int& client_fd) {
         send(client_fd, result, strlen(result),0);
     }
     else {
-        send_resp("-Missing filed. Try \"echo <text>\"\r\n",client_fd);
+        send_resp_string("-Missing filed. Try \"echo <text>\"\r\n",client_fd);
     }
 }
 
@@ -81,11 +100,11 @@ void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
                 && std::chrono::steady_clock::now() > client_data[client_fd][inp_arr[1]].expired_time)) {
                     client_data[client_fd].erase(inp_arr[1]);
                 }
-                send_resp("$-1\r\n",client_fd);
+                send_resp_string("$-1\r\n",client_fd);
             }
         }
         else {
-            send_resp("$-1\r\n",client_fd);
+            send_resp_string("$-1\r\n",client_fd);
         }
     }
     else {
@@ -119,21 +138,38 @@ void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
                     temp.expired_time = std::chrono::steady_clock::now() + std::chrono::seconds(expired_point);
                 }
             } catch (std::invalid_argument&) {
-                send_resp("-Invalid number\r\n",client_fd);
+                send_resp_string("-Invalid number\r\n",client_fd);
                 return;
             } catch (std::out_of_range&) {
-                send_resp("-Out of range\r\n",client_fd);
+                send_resp_string("-Out of range\r\n",client_fd);
                 return;
             }
             client_data[client_fd].insert({inp_arr[1], temp});
-            send_resp("+OK\r\n",client_fd);
+            send_resp_string("+OK\r\n",client_fd);
         }
         else {
-            send_resp("-Syntax Error. Try \"SET <var_name> <value> <option_field>\"\r\n",client_fd);
+            send_resp_string("-Syntax Error. Try \"SET <var_name> <value> <option_field>\"\r\n",client_fd);
         }
     }
     else {
-        send_resp("-Syntax Error. Try \"SET <var_name> <value> <option_field>\"\r\n",client_fd);
+        send_resp_string("-Syntax Error. Try \"SET <var_name> <value> <option_field>\"\r\n",client_fd);
+    }
+}
+
+void handle_rpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::vector<std::string>>> &client_data_list,int& client_fd) {
+    size_t check = inp_arr.size();
+    if (check >= 3) {
+        bool check_name = check_valid_varname(inp_arr[1]);
+        if (check_name) {
+            for (int i = 2; i < check; i++) {
+                client_data_list[client_fd][inp_arr[1]].push_back(inp_arr[i]);
+            }
+            check = client_data_list[client_fd][inp_arr[1]].size();
+            send_resp_int(check,client_fd);
+        }
+    }
+    else {
+        send_resp_string("-Syntax Error. Try \"RPUSH <var_name> <element> [element1 element2 ...\"\r\n",client_fd);
     }
 }
 
@@ -164,11 +200,15 @@ void handleInput(const std::string &s, int& client_fd)
         }
         else if (key_word == "get") {
             std::cout << "Handle get command" << std::endl;
-            handle_get_cmd(inp_arr,client_data,client_fd);
+            handle_get_cmd(inp_arr,client_data_string,client_fd);
         }
         else if (key_word == "set") {
             std::cout << "Handle set command" << std::endl;
-            handle_set_cmd(inp_arr,client_data,client_fd);
+            handle_set_cmd(inp_arr,client_data_string,client_fd);
+        }
+        else if (key_word == "rpush") {
+            std::cout << "Handle rpush command" << std::endl;
+            handle_rpush_cmd(inp_arr,client_data_list,client_fd);
         }
         else {
             std::cout << "Handle unkown command" << std::endl;

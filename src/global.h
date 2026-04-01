@@ -15,7 +15,7 @@ struct data {
     std::chrono::steady_clock::time_point expired_time;
 };
 
-extern std::unordered_map<int,std::unordered_map<std::string, data>> client_data;
-
+extern std::unordered_map<int,std::unordered_map<std::string, data>> client_data_string;
+extern std::unordered_map<int,std::unordered_map<std::string,std::vector<std::string>>> client_data_list;
 
 #endif //REDIS_STARTER_CPP_GLOBAL_H

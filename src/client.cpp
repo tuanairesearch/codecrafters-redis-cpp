@@ -32,7 +32,7 @@ bool handleClient(int &client_fd) {
 
     if (size_of_buffer == 0) {
         std::cout << "Client discoonedted!" << std::endl;
-        client_data.erase(client_fd);
+        client_data_string.erase(client_fd);
         return false;
     }
 
