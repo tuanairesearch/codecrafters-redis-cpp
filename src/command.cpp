@@ -188,6 +188,8 @@ void handle_unknown_cmd(int& client_fd) {
 }
 
 
+// ------------  Input/Output logic -------------
+
 void handleInput(const std::string &s, int& client_fd)
 {
     int str_pos = 0;
