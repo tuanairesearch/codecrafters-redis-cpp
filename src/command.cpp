@@ -40,7 +40,6 @@ void send_resp_string(const char *message, int& client_fd) {
 // --------- Checking system -----------------
 
 bool check_valid_varname(std::string& s) {
-    std::string check = s;
     if (s.length() > 0) {
         char c = s[0];
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c == '_'))
@@ -92,9 +91,7 @@ void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
                 || client_data[client_fd][inp_arr[1]].has_expired == false);
             if (check_valid) {
                 std::string s = handleOutput(client_data[client_fd][inp_arr[1]].value);
-                char result[s.length() + 1];
-                strcpy(result,s.c_str());
-                send(client_fd,result,strlen(result),0);
+                send(client_fd,s.c_str(),s.length(),0);
             }
             else {
 
@@ -112,8 +109,7 @@ void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
         }
     }
     else {
-        char respond[] = "-Syntax Error. Try \"GET <var_name> <value>\"\r\n";
-        send(client_fd, respond,strlen(respond),0);
+        send_resp_string("-Syntax Error. Try \"GET <var_name> <value>\"\r\n",client_fd);
     }
 }
 
