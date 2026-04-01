@@ -36,4 +36,4 @@ std::unordered_map<int,std::unordered_map<std::string, data>> client_data_string
  *  data of list ls1(int) client_data_list[4][ls1]
  *  
  */
-std::unordered_map<int,std::unordered_map<std::string,std::vector<std::string>>> client_data_list;
+std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> client_data_list;

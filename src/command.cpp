@@ -40,8 +40,10 @@ void send_resp_string(const char *message, int& client_fd) {
 // --------- Checking system -----------------
 
 bool check_valid_varname(std::string& s) {
+    std::string check = s;
     if (s.length() > 0) {
-        if ((s[0] >= 'a' && s[0] <= 'z') || (s[0] >= 'A' && s[0] <= 'Z') || (s[0] = '_'))
+        char c = s[0];
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c == '_'))
             return true;
         else
             return false;
@@ -50,9 +52,11 @@ bool check_valid_varname(std::string& s) {
         return false;
 }
 
+// -------------------------------------------
+// -------------- COMMAND --------------------
+// -------------------------------------------
 
-// ----------- Command -----------------------
-
+// -------------- Command test server --------------
 void handle_ping_cmd(int& client_fd) {
     send_resp_string("+PONG\r\n", client_fd);
 }
@@ -63,15 +67,15 @@ void handle_echo_cmd(std::vector<std::string> &inp_arr, int& client_fd) {
     std::cout << "-----------------------" << std::endl;
     if (inp_arr.size() == 2) {
         std::string s = handleOutput(inp_arr[1]);
-        char result[s.length() + 1];
-        strcpy(result, s.c_str());
         std::cout << "result = " << s << std::endl;
-        send(client_fd, result, strlen(result),0);
+        send(client_fd, s.c_str(), s.length(),0);
     }
     else {
         send_resp_string("-Missing filed. Try \"echo <text>\"\r\n",client_fd);
     }
 }
+
+// -------------- Command handle var - string data ----------------
 
 void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string, data>> &client_data, int &client_fd) {
     size_t check = inp_arr.size();
@@ -121,8 +125,7 @@ void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
         temp.has_expired = false;
         temp.expired_time = std::chrono::steady_clock::now();
         client_data[client_fd].insert({inp_arr[1], temp});
-        char respond[] = "+OK\r\n";
-        send(client_fd, respond,strlen(respond),0);
+        send_resp_string("+OK\r\n",client_fd);
     }
     else if (check == 5) {
         temp.has_expired = true;
@@ -156,7 +159,9 @@ void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
     }
 }
 
-void handle_rpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::vector<std::string>>> &client_data_list,int& client_fd) {
+// -------------- Command handle list - string data ----------------
+
+void handle_rpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> &client_data_list,int& client_fd) {
     size_t check = inp_arr.size();
     if (check >= 3) {
         bool check_name = check_valid_varname(inp_arr[1]);
@@ -167,11 +172,16 @@ void handle_rpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,
             check = client_data_list[client_fd][inp_arr[1]].size();
             send_resp_int(check,client_fd);
         }
+        else {
+            send_resp_string("-Invalid variable name. The name start with '_' or alphabet character.\r\n",client_fd);
+        }
     }
     else {
         send_resp_string("-Syntax Error. Try \"RPUSH <var_name> <element> [element1 element2 ...\"\r\n",client_fd);
     }
 }
+
+// ------------ Command for catching error -----------------
 
 void handle_unknown_cmd(int& client_fd) {
     char result[] = "-Unknown command\r\n";

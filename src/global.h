@@ -5,6 +5,7 @@
 #ifndef REDIS_STARTER_CPP_GLOBAL_H
 #define REDIS_STARTER_CPP_GLOBAL_H
 #include <chrono>
+#include <deque>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -16,6 +17,6 @@ struct data {
 };
 
 extern std::unordered_map<int,std::unordered_map<std::string, data>> client_data_string;
-extern std::unordered_map<int,std::unordered_map<std::string,std::vector<std::string>>> client_data_list;
+extern std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> client_data_list;
 
 #endif //REDIS_STARTER_CPP_GLOBAL_H
