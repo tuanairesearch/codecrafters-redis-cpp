@@ -26,6 +26,7 @@ std::string toLowerStr(std::string s)
     }
     return s;
 }
+
 // -------- Helper -------------
 template <typename T>
 void send_resp_int(T num, int& client_fd) {
@@ -37,11 +38,60 @@ void send_resp_string(const char *message, int& client_fd) {
     send(client_fd, message, strlen(message),0);
 }
 
+int translate_posion(const int& position, const int& number_of_element) {
+    int value = position;
+    if (position < 0) {
+        value = value + number_of_element;
+        if (value < 0)
+            value = 0;
+    }
+    else {
+        value = std::min(value,number_of_element);
+    }
+    return value;
+}
+
+void send_resp_list(std::deque<std::string>& my_list, int start_p, int end_p, int& client_fd) {
+    int list_size = my_list.size();
+    std::string respond ="";
+    int start_position = translate_posion(start_p, list_size);
+    int end_position = translate_posion(end_p, list_size);
+    if (start_position <= end_position) {
+        int i = 0;
+        int count = 0;
+        for (i = start_position; i <= end_position && i < list_size; i++) {
+            count++;
+            respond = respond +"$" + std::to_string(my_list[i].size()) + "\r\n" + my_list[i] + "\r\n";
+        }
+        respond = "*" + std::to_string(count) + "\r\n" +respond;
+    }
+    else {
+        int i;
+        int count = 0;
+        for (i = start_position; i >= end_position; i--) {
+            count++;
+            respond = respond +"$" + std::to_string(my_list.size()) + "\r\n";
+        }
+        respond = "*" + std::to_string(count) + "\r\n" +respond;
+    }
+    send(client_fd, respond.c_str(),respond.size(),0);
+}
+
 // --------- Checking system -----------------
 
-bool check_valid_varname(std::string& s) {
-    if (s.length() > 0) {
-        char c = s[0];
+bool check_str_is_int(std::string s) {
+    int i = 0;
+    if (s[i] == '-' || s[i] == '+') i++;
+    for (i; i< s.length(); i++) {
+        if (!(s[i] >= '0' && s[i] <= '9'))
+            return false;
+    }
+    return true;
+}
+
+bool check_valid_varname(std::string& name) {
+    if (name.length() > 0) {
+        char c = name[0];
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c == '_'))
             return true;
         else
@@ -177,6 +227,19 @@ void handle_rpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,
     }
 }
 
+void handle_lrange_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> &client_data_list,int& client_fd) {
+    size_t check = inp_arr.size();
+    if (check == 4) {
+        if (check_str_is_int(inp_arr[2]) && check_str_is_int(inp_arr[3])) {
+            int start_p = std::stoi(inp_arr[2]);
+            int end_p = std::stoi(inp_arr[3]);
+            send_resp_list(client_data_list[client_fd][inp_arr[1]],start_p,end_p,client_fd);
+        }
+    }
+    else {
+        send_resp_string("-Syntax Error. Try LRANGE <var_name> <start> <stop>\r\n", client_fd);
+    }
+}
 // ------------ Command for catching error -----------------
 
 void handle_unknown_cmd(int& client_fd) {
@@ -216,6 +279,10 @@ void handleInput(const std::string &s, int& client_fd)
         else if (key_word == "rpush") {
             std::cout << "Handle rpush command" << std::endl;
             handle_rpush_cmd(inp_arr,client_data_list,client_fd);
+        }
+        else if (key_word == "lrange") {
+            std::cout << "Handle lrange command" << std::endl;
+            handle_lrange_cmd(inp_arr, client_data_list,client_fd);
         }
         else {
             std::cout << "Handle unkown command" << std::endl;
