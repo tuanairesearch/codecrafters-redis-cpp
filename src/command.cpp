@@ -56,23 +56,28 @@ void send_resp_list(std::deque<std::string>& my_list, int start_p, int end_p, in
     std::string respond ="";
     int start_position = translate_posion(start_p, list_size);
     int end_position = translate_posion(end_p, list_size);
-    if (start_position <= end_position) {
-        int i = 0;
-        int count = 0;
-        for (i = start_position; i <= end_position && i < list_size; i++) {
-            count++;
-            respond = respond +"$" + std::to_string(my_list[i].size()) + "\r\n" + my_list[i] + "\r\n";
+    if (start_p * end_p >= 0) {
+        if (start_position <= end_position) {
+            int i = 0;
+            int count = 0;
+            for (i = start_position; i <= end_position && i < list_size; i++) {
+                count++;
+                respond = respond +"$" + std::to_string(my_list[i].size()) + "\r\n" + my_list[i] + "\r\n";
+            }
+            respond = "*" + std::to_string(count) + "\r\n" +respond;
         }
-        respond = "*" + std::to_string(count) + "\r\n" +respond;
+        else{
+            int i;
+            int count = 0;
+            for (i = start_position; i >= end_position; i--) {
+                count++;
+                respond = respond +"$" + std::to_string(my_list.size()) + "\r\n";
+            }
+            respond = "*" + std::to_string(count) + "\r\n" +respond;
+        }
     }
     else {
-        int i;
-        int count = 0;
-        for (i = start_position; i >= end_position; i--) {
-            count++;
-            respond = respond +"$" + std::to_string(my_list.size()) + "\r\n";
-        }
-        respond = "*" + std::to_string(count) + "\r\n" +respond;
+        respond = "$0\r\n";
     }
     send(client_fd, respond.c_str(),respond.size(),0);
 }
