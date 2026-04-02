@@ -245,6 +245,9 @@ void handle_lrange_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int
             int end_p = std::stoi(inp_arr[3]);
             send_resp_list(client_data_list[client_fd][inp_arr[1]],start_p,end_p,client_fd);
         }
+        else {
+            send_resp_string("-Syntax Error. Try LRANGE <var_name> <start> <stop>\r\n", client_fd);
+        }
     }
     else {
         send_resp_string("-Syntax Error. Try LRANGE <var_name> <start> <stop>\r\n", client_fd);
