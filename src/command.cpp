@@ -67,7 +67,7 @@ void send_resp_list(std::deque<std::string>& my_list, int start_p, int end_p, in
             }
             respond = "*" + std::to_string(count) + "\r\n" +respond;
         }
-        else if (start_position >= end_position){
+        else if (start_position >= end_position && start_p <= 0 && end_p <= 0){
             int i;
             int count = 0;
             for (i = start_position; i >= end_position; i--) {
