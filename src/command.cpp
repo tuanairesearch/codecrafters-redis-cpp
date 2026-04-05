@@ -222,7 +222,7 @@ void handle_rpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,
     }
 }
 
-void handle_lpush_cd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> &client_data_list,int& client_fd) {
+void handle_lpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> &client_data_list,int& client_fd) {
     size_t check = inp_arr.size();
     if (check >= 3) {
         bool check_name = check_valid_varname(inp_arr[1]);
@@ -296,7 +296,7 @@ void handleInput(const std::string &s, int& client_fd)
         }
         else if (key_word == "rpush") {
             std::cout << "Handle rpush command" << std::endl;
-            handle_rpush_cmd(inp_arr,client_data_list,client_fd);
+            handle_rpush_cmd();
         }
         else if (key_word == "lrange") {
             std::cout << "Handle lrange command" << std::endl;
@@ -304,7 +304,7 @@ void handleInput(const std::string &s, int& client_fd)
         }
         else if (key_word == "lpush") {
             std::cout << "Handle lpush command" << std::endl;
-
+            handle_lpush_cmd(inp_arr,client_data_list,client_fd);
         }
         else {
             std::cout << "Handle unkown command" << std::endl;
