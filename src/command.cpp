@@ -296,7 +296,7 @@ void handleInput(const std::string &s, int& client_fd)
         }
         else if (key_word == "rpush") {
             std::cout << "Handle rpush command" << std::endl;
-            handle_rpush_cmd();
+            handle_rpush_cmd(inp_arr,client_data_list,client_fd);
         }
         else if (key_word == "lrange") {
             std::cout << "Handle lrange command" << std::endl;
