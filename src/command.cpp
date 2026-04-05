@@ -298,13 +298,13 @@ void handleInput(const std::string &s, int& client_fd)
             std::cout << "Handle rpush command" << std::endl;
             handle_rpush_cmd(inp_arr,client_data_list,client_fd);
         }
-        else if (key_word == "lrange") {
-            std::cout << "Handle lrange command" << std::endl;
-            handle_lrange_cmd(inp_arr, client_data_list,client_fd);
-        }
         else if (key_word == "lpush") {
             std::cout << "Handle lpush command" << std::endl;
             handle_lpush_cmd(inp_arr,client_data_list,client_fd);
+        }
+        else if (key_word == "lrange") {
+            std::cout << "Handle lrange command" << std::endl;
+            handle_lrange_cmd(inp_arr, client_data_list,client_fd);
         }
         else {
             std::cout << "Handle unkown command" << std::endl;
