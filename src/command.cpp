@@ -63,7 +63,7 @@ void send_resp_list(std::deque<std::string>& my_list, int start_p, int end_p, in
             int count = 0;
             for (i = start_position; i <= end_position && i < list_size; i++) {
                 count++;
-                respond = respond +"$" + std::to_string(my_list[i].size()) + "\r\n" + my_list[i] + "\r\n";
+                respond = respond + "$" + std::to_string(my_list[i].size()) + "\r\n" + my_list[i] + "\r\n";
             }
             respond = "*" + std::to_string(count) + "\r\n" +respond;
         }
@@ -72,7 +72,7 @@ void send_resp_list(std::deque<std::string>& my_list, int start_p, int end_p, in
             int count = 0;
             for (i = start_position; i >= end_position; i--) {
                 count++;
-                respond = respond +"$" + std::to_string(my_list.size()) + "\r\n";
+                respond = respond + "$" + std::to_string(my_list[i].size()) + "\r\n" + my_list[i] + "\r\n";
             }
             respond = "*" + std::to_string(count) + "\r\n" +respond;
         }
