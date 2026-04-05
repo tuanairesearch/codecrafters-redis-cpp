@@ -57,33 +57,18 @@ void send_resp_list(std::deque<std::string>& my_list, int start_p, int end_p, in
     int start_position = translate_posion(start_p, list_size);
     int end_position = translate_posion(end_p, list_size);
     std::cout << "start pos: " << start_position << " ;end pos: " << end_position << std::endl;
-    if (start_p*end_p >= 0) {
-        if (start_position <= end_position) {
-            int i = 0;
-            int count = 0;
-            for (i = start_position; i <= end_position && i < list_size; i++) {
-                count++;
-                respond = respond + "$" + std::to_string(my_list[i].size()) + "\r\n" + my_list[i] + "\r\n";
-            }
-            respond = "*" + std::to_string(count) + "\r\n" +respond;
+    if (start_position <= end_position && start_p*end_p >= 0) {
+        int i = 0;
+        int count = 0;
+        for (i = start_position; i <= end_position && i < list_size; i++) {
+            count++;
+            respond = respond + "$" + std::to_string(my_list[i].size()) + "\r\n" + my_list[i] + "\r\n";
         }
-        /*else if (start_position >= end_position && start_p <= 0 && end_p <= 0){
-            int i;
-            int count = 0;
-            for (i = start_position; i >= end_position; i--) {
-                count++;
-                respond = respond + "$" + std::to_string(my_list[i].size()) + "\r\n" + my_list[i] + "\r\n";
-            }
-            respond = "*" + std::to_string(count) + "\r\n" +respond;
-        }*/
-        else {
-            respond = "*0\r\n";
-        }
+        respond = "*" + std::to_string(count) + "\r\n" +respond;
     }
     else {
         respond = "*0\r\n";
     }
-
     send(client_fd, respond.c_str(),respond.size(),0);
 }
 
@@ -237,6 +222,26 @@ void handle_rpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,
     }
 }
 
+void handle_lpush_cd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> &client_data_list,int& client_fd) {
+    size_t check = inp_arr.size();
+    if (check >= 3) {
+        bool check_name = check_valid_varname(inp_arr[1]);
+        if (check_name) {
+            for (int i = 2; i < check; i++) {
+                client_data_list[client_fd][inp_arr[1]].push_front(inp_arr[i]);
+            }
+            check = client_data_list[client_fd][inp_arr[1]].size();
+            send_resp_int(check,client_fd);
+        }
+        else {
+            send_resp_string("-Invalid variable name. The name start with '_' or alphabet character.\r\n",client_fd);
+        }
+    }
+    else {
+        send_resp_string("-Syntax Error. Try \"LPUSH <var_name> <element> [element1 element2 ...\"\r\n",client_fd);
+    }
+}
+
 void handle_lrange_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> &client_data_list,int& client_fd) {
     size_t check = inp_arr.size();
     if (check == 4) {
@@ -296,6 +301,10 @@ void handleInput(const std::string &s, int& client_fd)
         else if (key_word == "lrange") {
             std::cout << "Handle lrange command" << std::endl;
             handle_lrange_cmd(inp_arr, client_data_list,client_fd);
+        }
+        else if (key_word == "lpush") {
+            std::cout << "Handle lpush command" << std::endl;
+
         }
         else {
             std::cout << "Handle unkown command" << std::endl;
