@@ -242,6 +242,19 @@ void handle_lpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,
     }
 }
 
+void handle_llen_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> &client_data_list,int& client_fd) {
+    size_t check = inp_arr.size();
+    if (check == 2) {
+        bool check_name = check_valid_varname(inp_arr[1]);
+        if (check_name) {
+            send_resp_int(client_data_list[client_fd][inp_arr[1]].size(),client_fd);
+        }
+        else {
+            send_resp_string("-Invalid variable name. The name start with '_' or alphabet character.\r\n",client_fd);
+        }
+    }
+}
+
 void handle_lrange_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> &client_data_list,int& client_fd) {
     size_t check = inp_arr.size();
     if (check == 4) {
@@ -305,6 +318,10 @@ void handleInput(const std::string &s, int& client_fd)
         else if (key_word == "lrange") {
             std::cout << "Handle lrange command" << std::endl;
             handle_lrange_cmd(inp_arr, client_data_list,client_fd);
+        }
+        else if (key_word == "llen") {
+            std::cout << "Handle llen command" << std::endl;
+            handle_llen_cmd(inp_arr, client_data_list,client_fd);
         }
         else {
             std::cout << "Handle unkown command" << std::endl;
