@@ -121,30 +121,30 @@ void handle_echo_cmd(std::vector<std::string> &inp_arr, int& client_fd) {
 
 // -------------- Command handle var - string data ----------------
 
-void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string, data>> &client_data, int &client_fd) {
+void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string, data> &client_data, int &client_fd) {
     size_t check = inp_arr.size();
     if (check == 2) {
         std::cout << "\"" << inp_arr[1] << "\"" << std::endl;
-        if (client_data[client_fd].contains(inp_arr[1])) {
+        if (client_data.contains(inp_arr[1])) {
 
             // Check has_expired
             // If has_expired == false -> show variable
             // If has_expired == true -> check if now() < expired_time -> show variable
 
-            bool check_valid = ((client_data[client_fd][inp_arr[1]].has_expired == true
-                && std::chrono::steady_clock::now() <= client_data[client_fd][inp_arr[1]].expired_time)
-                || client_data[client_fd][inp_arr[1]].has_expired == false);
+            bool check_valid = ((client_data[inp_arr[1]].has_expired == true
+                && std::chrono::steady_clock::now() <= client_data[inp_arr[1]].expired_time)
+                || client_data[inp_arr[1]].has_expired == false);
             if (check_valid) {
-                std::string s = handleOutput(client_data[client_fd][inp_arr[1]].value);
+                std::string s = handleOutput(client_data[inp_arr[1]].value);
                 send(client_fd,s.c_str(),s.length(),0);
             }
             else {
 
                 // if variable expired -> delete it too (this is call lazy check)
 
-                if ((client_data[client_fd][inp_arr[1]].has_expired == true
-                && std::chrono::steady_clock::now() > client_data[client_fd][inp_arr[1]].expired_time)) {
-                    client_data[client_fd].erase(inp_arr[1]);
+                if ((client_data[inp_arr[1]].has_expired == true
+                && std::chrono::steady_clock::now() > client_data[inp_arr[1]].expired_time)) {
+                    client_data.erase(inp_arr[1]);
                 }
                 send_resp_string("$-1\r\n",client_fd);
             }
@@ -158,14 +158,14 @@ void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
     }
 }
 
-void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string, data>> &client_data, int &client_fd) {
+void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string, data> &client_data, int &client_fd) {
     size_t check = inp_arr.size();
     struct data temp;
     temp.value = inp_arr[2];
     if (check == 3) {
         temp.has_expired = false;
         temp.expired_time = std::chrono::steady_clock::now();
-        client_data[client_fd].insert({inp_arr[1], temp});
+        client_data.insert({inp_arr[1], temp});
         send_resp_string("+OK\r\n",client_fd);
     }
     else if (check == 5) {
@@ -188,7 +188,7 @@ void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
                 send_resp_string("-Out of range\r\n",client_fd);
                 return;
             }
-            client_data[client_fd].insert({inp_arr[1], temp});
+            client_data.insert({inp_arr[1], temp});
             send_resp_string("+OK\r\n",client_fd);
         }
         else {
@@ -202,15 +202,15 @@ void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,st
 
 // -------------- Command handle list - string data ----------------
 
-void handle_rpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> &client_data_list,int& client_fd) {
+void handle_rpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd) {
     size_t check = inp_arr.size();
     if (check >= 3) {
         bool check_name = check_valid_varname(inp_arr[1]);
         if (check_name) {
             for (int i = 2; i < check; i++) {
-                client_data_list[client_fd][inp_arr[1]].push_back(inp_arr[i]);
+                client_data_list[inp_arr[1]].push_back(inp_arr[i]);
             }
-            check = client_data_list[client_fd][inp_arr[1]].size();
+            check = client_data_list[inp_arr[1]].size();
             send_resp_int(check,client_fd);
         }
         else {
@@ -222,15 +222,15 @@ void handle_rpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,
     }
 }
 
-void handle_lpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> &client_data_list,int& client_fd) {
+void handle_lpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd) {
     size_t check = inp_arr.size();
     if (check >= 3) {
         bool check_name = check_valid_varname(inp_arr[1]);
         if (check_name) {
             for (int i = 2; i < check; i++) {
-                client_data_list[client_fd][inp_arr[1]].push_front(inp_arr[i]);
+                client_data_list[inp_arr[1]].push_front(inp_arr[i]);
             }
-            check = client_data_list[client_fd][inp_arr[1]].size();
+            check = client_data_list[inp_arr[1]].size();
             send_resp_int(check,client_fd);
         }
         else {
@@ -242,12 +242,12 @@ void handle_lpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,
     }
 }
 
-void handle_llen_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> &client_data_list,int& client_fd) {
+void handle_llen_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd) {
     size_t check = inp_arr.size();
     if (check == 2) {
         bool check_name = check_valid_varname(inp_arr[1]);
         if (check_name) {
-            send_resp_int(client_data_list[client_fd][inp_arr[1]].size(),client_fd);
+            send_resp_int(client_data_list[inp_arr[1]].size(),client_fd);
         }
         else {
             send_resp_string("-Invalid variable name. The name start with '_' or alphabet character.\r\n",client_fd);
@@ -255,13 +255,17 @@ void handle_llen_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,s
     }
 }
 
-void handle_lrange_cmd(std::vector<std::string> &inp_arr, std::unordered_map<int,std::unordered_map<std::string,std::deque<std::string>>> &client_data_list,int& client_fd) {
+void hanlde_lpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd) {
+    size_t check = inp_arr.size();
+}
+
+void handle_lrange_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd) {
     size_t check = inp_arr.size();
     if (check == 4) {
         if (check_str_is_int(inp_arr[2]) && check_str_is_int(inp_arr[3])) {
             int start_p = std::stoi(inp_arr[2]);
             int end_p = std::stoi(inp_arr[3]);
-            send_resp_list(client_data_list[client_fd][inp_arr[1]],start_p,end_p,client_fd);
+            send_resp_list(client_data_list[inp_arr[1]],start_p,end_p,client_fd);
         }
         else {
             send_resp_string("-Syntax Error. Try LRANGE <var_name> <start> <stop>\r\n", client_fd);
