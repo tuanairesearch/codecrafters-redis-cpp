@@ -126,11 +126,9 @@ void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::s
     if (check == 2) {
         std::cout << "\"" << inp_arr[1] << "\"" << std::endl;
         if (client_data.contains(inp_arr[1])) {
-
             // Check has_expired
             // If has_expired == false -> show variable
             // If has_expired == true -> check if now() < expired_time -> show variable
-
             bool check_valid = ((client_data[inp_arr[1]].has_expired == true
                 && std::chrono::steady_clock::now() <= client_data[inp_arr[1]].expired_time)
                 || client_data[inp_arr[1]].has_expired == false);
@@ -255,8 +253,24 @@ void handle_llen_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::
     }
 }
 
-void hanlde_lpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd) {
+void handle_lpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd) {
     size_t check = inp_arr.size();
+    int number_element_remove;
+    if (check == 2 || check == 3) {
+        if (check == 2) number_element_remove = 1;
+        else {
+            if (check_str_is_int(inp_arr[2])) {
+                number_element_remove = std::stoi(inp_arr[2]);
+            }
+            else {
+                send_resp_string("-Invalid number of element\r\n",client_fd);
+            }
+        }
+        send_resp_list(client_data_list[inp_arr[1]],0,number_element_remove - 1 ,client_fd);
+        for (int i = 0; i < number_element_remove && client_data_list[inp_arr[1]].size() != 0;i++) {
+            client_data_list[inp_arr[1]].pop_front();
+        }
+    }
 }
 
 void handle_lrange_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd) {
@@ -326,6 +340,10 @@ void handleInput(const std::string &s, int& client_fd)
         else if (key_word == "llen") {
             std::cout << "Handle llen command" << std::endl;
             handle_llen_cmd(inp_arr, client_data_list,client_fd);
+        }
+        else if (key_word == "lpop") {
+            std::cout << "Handle lpop command" << std::endl;
+            handle_lpop_cmd(inp_arr, client_data_list,client_fd);
         }
         else {
             std::cout << "Handle unkown command" << std::endl;
