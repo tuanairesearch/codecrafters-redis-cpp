@@ -38,6 +38,11 @@ void send_resp_string(const char *message, int& client_fd) {
     send(client_fd, message, strlen(message),0);
 }
 
+void send_resp_string(std::string& s, int& client_fd) {
+    std::string respond ="$" + std::to_string(s.length()) + "\r\n" + s + "\r\n";
+    send(client_fd,respond.c_str(),respond.size(),0);
+}
+
 int translate_posion(const int& position, const int& number_of_element) {
     int value = position;
     if (position < 0) {
@@ -256,15 +261,15 @@ void handle_llen_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::
 void handle_lpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd) {
     size_t check = inp_arr.size();
     int number_element_remove;
-    if (check == 2 || check == 3) {
-        if (check == 2) number_element_remove = 1;
+    if (check == 2 && client_data_list[inp_arr[1]].size() != 0) {
+        send_resp_string(client_data_list[inp_arr[1]][0],client_fd);
+        client_data_list[inp_arr[1]].pop_front();
+    } else if (check == 2 || check == 3) {
+        if (check_str_is_int(inp_arr[2])) {
+            number_element_remove = std::stoi(inp_arr[2]);
+        }
         else {
-            if (check_str_is_int(inp_arr[2])) {
-                number_element_remove = std::stoi(inp_arr[2]);
-            }
-            else {
-                send_resp_string("-Invalid number of element\r\n",client_fd);
-            }
+            send_resp_string("-Invalid number of element\r\n",client_fd);
         }
         send_resp_list(client_data_list[inp_arr[1]],0,number_element_remove - 1 ,client_fd);
         for (int i = 0; i < number_element_remove && client_data_list[inp_arr[1]].size() != 0;i++) {
