@@ -12,5 +12,5 @@ std::string handleOutput(std::string &s);
 std::string toLowerStr(std::string s);
 void handleInput(const std::string &s, int& client_fd);
 std::string toLowerStr(std::string s);
-
+extern void send_resp_string(const char *message, int& client_fd);
 #endif //CODECRAFTERS_REDIS_CPP_COMMAND_H

@@ -160,7 +160,7 @@ void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::s
         send_resp_string("-Syntax Error. Try \"GET <var_name> <value>\"\r\n",client_fd);
     }
 }
-
+// Error in code -> wrong behaviour, set is overide data
 void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string, data> &client_data, int &client_fd) {
     size_t check = inp_arr.size();
     struct data temp;
@@ -264,7 +264,7 @@ void handle_lpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::
     if (check == 2 && client_data_list[inp_arr[1]].size() != 0) {
         send_resp_string(client_data_list[inp_arr[1]][0],client_fd);
         client_data_list[inp_arr[1]].pop_front();
-    } else if (check == 2 || check == 3) {
+    } else if (check == 3) {
         if (check_str_is_int(inp_arr[2])) {
             number_element_remove = std::stoi(inp_arr[2]);
         }
@@ -292,6 +292,38 @@ void handle_lrange_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std
     }
     else {
         send_resp_string("-Syntax Error. Try LRANGE <var_name> <start> <stop>\r\n", client_fd);
+    }
+}
+
+void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd) {
+    size_t check = inp_arr.size();
+    if (check == 3) {
+        if (check_str_is_int(inp_arr[2]) && check_valid_varname(inp_arr[1])) {
+            int blocking_time = std::stoi(inp_arr[2]);
+            struct client_time_data temp_data;
+            if (blocking_time == 0) {
+                temp_data.client_fd = client_fd;
+                temp_data.has_expired = false;
+            }
+            else {
+                temp_data.client_fd = client_fd;
+                temp_data.has_expired = true;
+                temp_data.expired_time = std::chrono::steady_clock::now() + std::chrono::seconds(blocking_time);
+                expired_clients.push_back(temp_data);
+            }
+            if (client_data_list[inp_arr[1]].size() > 0) {
+                client_data_list[inp_arr[1]].pop_front();
+            }
+            else {
+                expired_clients.push_back(temp_data);
+            }
+        }
+        else {
+            send_resp_string("-Invalid name or time.\r\n",client_fd);
+        }
+    }
+    else {
+        send_resp_string("-Syntax Error. Try BLPOP <var_name> <time_out>\r\n",client_fd);
     }
 }
 // ------------ Command for catching error -----------------
@@ -349,6 +381,10 @@ void handleInput(const std::string &s, int& client_fd)
         else if (key_word == "lpop") {
             std::cout << "Handle lpop command" << std::endl;
             handle_lpop_cmd(inp_arr, client_data_list,client_fd);
+        }
+        else if (key_word == "blpop") {
+            std::cout << "Handle blpop command" << std::endl;
+            handle_blpop_cmd(inp_arr, client_data_list,client_fd);
         }
         else {
             std::cout << "Handle unkown command" << std::endl;

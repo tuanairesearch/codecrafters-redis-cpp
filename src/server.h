@@ -15,12 +15,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+#include "command.h"
+#include "global.h"
+
 class Server {
 public:
     Server(int port);
     ~Server();
 
     void init(); // initiate a new server
+
     void run(); // start server
 private:
     int port_;

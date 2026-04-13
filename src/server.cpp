@@ -1,5 +1,8 @@
 #include "server.h"
 #include "client.h"
+#include "global.h"
+#include "command.h"
+
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <cstring>
@@ -118,18 +121,31 @@ void Server::handleExistingClients(fd_set& readfds) {
     std::cout << std::endl;
 }
 
+int change_time_to_timeval(int _cpp_par_);
+
 void Server::run() {
     std::cout << "Run\n";
     while (true) {
         std::cout << "In While\n";
         int max_fd = server_fd_;
         fd_set readfds = buildFdSet(max_fd);
-        int retval = select(max_fd + 1, &readfds, NULL, NULL, NULL);
+        auto nearest_time = nearest_expired(expired_clients);
+        timeval t_out = change_time_to_timeval(nearest_time);
+        int retval = select(max_fd + 1, &readfds, NULL, NULL, &t_out);
         if (retval < 0) {
             perror("retval: ");
             continue;
         }
-        else {
+        else if (retval == 0) {
+            // Time out
+            for (auto x:expired_clients) {
+                if (x.has_expired && x.expired_time < std::chrono::steady_clock::now()) {
+                    send_resp_string("*-1\r\n",x.client_fd);
+                }
+            }
+        }
+        else
+        {
             std::cout << "Request found\n";
         }
         if (FD_ISSET(server_fd_, &readfds)) {
