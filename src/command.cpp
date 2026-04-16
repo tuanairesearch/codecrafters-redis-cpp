@@ -89,6 +89,21 @@ bool check_str_is_int(std::string s) {
     return true;
 }
 
+bool check_str_is_double(std::string s) {
+    double value;
+    try {
+        value = std::stod(s);
+    }
+    catch (std::invalid_argument&) {
+        return false;
+    }
+    catch (std::out_of_range&) {
+        return false;
+    }
+    return true;
+
+}
+
 bool check_valid_varname(std::string& name) {
     if (name.length() > 0) {
         char c = name[0];
@@ -298,8 +313,8 @@ void handle_lrange_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std
 void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd) {
     size_t check = inp_arr.size();
     if (check == 3) {
-        if (check_str_is_int(inp_arr[2]) && check_valid_varname(inp_arr[1])) {
-            int blocking_time = std::stoi(inp_arr[2]);
+        if (check_str_is_double(inp_arr[2]) && check_valid_varname(inp_arr[1])) {
+            double blocking_time = std::stod(inp_arr[2]);
             struct client_time_data temp_data;
             if (blocking_time == 0) {
                 temp_data.client_fd = client_fd;
@@ -308,7 +323,7 @@ void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std:
             else {
                 temp_data.client_fd = client_fd;
                 temp_data.has_expired = true;
-                temp_data.expired_time = std::chrono::steady_clock::now() + std::chrono::seconds(blocking_time);
+                temp_data.expired_time = std::chrono::steady_clock::now() + std::chrono::milliseconds(long(blocking_time*1000));
                 blocked_clients.push_back(temp_data);
             }
             if (client_data_list[inp_arr[1]].size() > 0) {
