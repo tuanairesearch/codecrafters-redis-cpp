@@ -60,7 +60,6 @@ timeval change_time_to_timeval(client_time_data &time_need_change) {
     if (time_need_change.has_expired) {
         auto duration = time_need_change.expired_time - std::chrono::steady_clock::now();
         long long mili_sec = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-        std::cerr << "ms: " << mili_sec << std::endl;
         if (mili_sec <= 0) {
             return{0,0};
         }
