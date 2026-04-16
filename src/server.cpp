@@ -135,8 +135,8 @@ void Server::run() {
         else {
             timeval t_out = change_time_to_timeval(nearest_time);
             //timeval t_test = {0,100'000};
-            int sec = nearest_time.expired_duration;
-            int u_sec = (nearest_time.expired_duration - sec) * 1'000'000 + 900'000;
+            int sec = nearest_time.expired_duration + 1;
+            int u_sec = (nearest_time.expired_duration - sec) * 1'000'000;
             timeval t_test = {sec,u_sec};
             auto start_point = std::chrono::steady_clock::now();
             //std::cerr << "tv_sec=" << t_out.tv_sec << " tv_usec=" << t_out.tv_usec << "\n";
