@@ -136,6 +136,7 @@ void Server::run() {
         }
         else {
             timeval t_out = change_time_to_timeval(nearest_time);
+            std::cerr << "tv_sec=" << t_out.tv_sec << " tv_usec=" << t_out.tv_usec << "\n";
             retval = select(max_fd + 1, &readfds, NULL, NULL, &t_out);
         }
         if (retval < 0) {
