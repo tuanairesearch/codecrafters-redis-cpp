@@ -325,6 +325,7 @@ void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std:
                 temp_data.client_fd = client_fd;
                 temp_data.has_expired = true;
                 temp_data.expired_time = std::chrono::steady_clock::now() + duration;
+                temp_data.expired_duration = blocking_time;
                 blocked_clients.push_back(temp_data);
             }
             if (client_data_list[inp_arr[1]].size() > 0) {

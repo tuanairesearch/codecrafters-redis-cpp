@@ -19,6 +19,7 @@ struct data {
 struct client_time_data {
     int client_fd;
     bool has_expired;
+    double expired_duration;
     std::chrono::steady_clock::time_point expired_time;
 };
 
