@@ -59,15 +59,15 @@ client_time_data nearest_expired (std::deque<client_time_data> &blocked_clients)
 timeval change_time_to_timeval(client_time_data &time_need_change) {
     if (time_need_change.has_expired) {
         auto duration = time_need_change.expired_time - std::chrono::steady_clock::now();
-        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+        auto ms = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
         std::cerr << "ms: " << ms << std::endl;
         if (ms <= 0) {
             return{0,0};
         }
         else {
             timeval temp;
-            temp.tv_sec = ms/1000;
-            temp.tv_usec = ms - temp.tv_sec*1000;
+            temp.tv_sec = ms/1'000'000;
+            temp.tv_usec = ms%1'000'000;
             return temp;
         }
     }
