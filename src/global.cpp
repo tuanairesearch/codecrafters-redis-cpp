@@ -66,7 +66,7 @@ timeval change_time_to_timeval(client_time_data &time_need_change) {
         }
         else {
             timeval temp;
-            temp.tv_sec = mili_sec/1'000'000 + 5;
+            temp.tv_sec = mili_sec/1'000'000 + 3;
             temp.tv_usec = mili_sec%1'000'000;
             return temp;
         }
