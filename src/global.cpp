@@ -35,13 +35,13 @@ std::unordered_map<std::string, data> client_data_string;
  */
 std::unordered_map<std::string,std::deque<std::string>> client_data_list;
 
-std::deque<client_time_data> expired_clients;
+std::deque<client_time_data> blocked_clients;
 
-client_time_data nearest_expired (std::deque<client_time_data> &expired_clients) {
+client_time_data nearest_expired (std::deque<client_time_data> &blocked_clients) {
     client_time_data temp;
-    if (expired_clients.size() > 0) {
-        temp = expired_clients[0];
-        for (auto x:expired_clients) {
+    if (blocked_clients.size() > 0) {
+        temp = blocked_clients[0];
+        for (auto x:blocked_clients) {
             if (temp.has_expired && x.has_expired && x.expired_time < temp.expired_time)
                 temp = x;
         }
@@ -56,7 +56,7 @@ client_time_data nearest_expired (std::deque<client_time_data> &expired_clients)
 
 timeval change_time_to_timeval(client_time_data &time_need_change) {
     if (time_need_change.has_expired) {
-        auto duration = std::chrono::steady_clock::now() - time_need_change.expired_time;
+        auto duration = time_need_change.expired_time - std::chrono::steady_clock::now();
         auto ms = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
         if (ms <= 0) {
             return{0,0};

@@ -129,16 +129,22 @@ void Server::run() {
         std::cout << "In While\n";
         int max_fd = server_fd_;
         fd_set readfds = buildFdSet(max_fd);
-        auto nearest_time = nearest_expired(expired_clients);
-        timeval t_out = change_time_to_timeval(nearest_time);
-        int retval = select(max_fd + 1, &readfds, NULL, NULL, &t_out);
+        auto nearest_time = nearest_expired(blocked_clients);
+        int retval;
+        if (blocked_clients.size() == 0 || nearest_time.has_expired == false) {
+            retval=select(max_fd + 1, &readfds, NULL, NULL, NULL);
+        }
+        else {
+            timeval t_out = change_time_to_timeval(nearest_time);
+            retval = select(max_fd + 1, &readfds, NULL, NULL, &t_out);
+        }
         if (retval < 0) {
             perror("retval: ");
             continue;
         }
         else if (retval == 0) {
             // Time out
-            for (auto x:expired_clients) {
+            for (auto x:blocked_clients) {
                 if (x.has_expired && x.expired_time < std::chrono::steady_clock::now()) {
                     send_resp_string("*-1\r\n",x.client_fd);
                 }

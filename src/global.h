@@ -24,7 +24,7 @@ struct client_time_data {
 
 
 
-extern std::deque<client_time_data> expired_clients;
+extern std::deque<client_time_data> blocked_clients;
 
 extern std::unordered_map<std::string, data> client_data_string;
 

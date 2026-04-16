@@ -309,13 +309,13 @@ void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std:
                 temp_data.client_fd = client_fd;
                 temp_data.has_expired = true;
                 temp_data.expired_time = std::chrono::steady_clock::now() + std::chrono::seconds(blocking_time);
-                expired_clients.push_back(temp_data);
+                blocked_clients.push_back(temp_data);
             }
             if (client_data_list[inp_arr[1]].size() > 0) {
                 client_data_list[inp_arr[1]].pop_front();
             }
             else {
-                expired_clients.push_back(temp_data);
+                blocked_clients.push_back(temp_data);
             }
         }
         else {
@@ -324,6 +324,18 @@ void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std:
     }
     else {
         send_resp_string("-Syntax Error. Try BLPOP <var_name> <time_out>\r\n",client_fd);
+    }
+}
+
+void handle_blocked_clients(std::vector<std::string> &inp_arr,
+    std::unordered_map<std::string,std::deque<std::string>> &client_data_list,std::deque<client_time_data> &blocked_clients) {
+    while (blocked_clients.size() > 0 && client_data_list[inp_arr[1]].size() > 0) {
+        std::deque<std::string> my_list;
+        my_list.push_back(inp_arr[1]);
+        my_list.push_back(client_data_list[inp_arr[1]].front());
+        send_resp_list(my_list,0,1,blocked_clients.front().client_fd);
+        client_data_list[inp_arr[1]].pop_front();
+        blocked_clients.pop_front();
     }
 }
 // ------------ Command for catching error -----------------
@@ -365,10 +377,12 @@ void handleInput(const std::string &s, int& client_fd)
         else if (key_word == "rpush") {
             std::cout << "Handle rpush command" << std::endl;
             handle_rpush_cmd(inp_arr,client_data_list,client_fd);
+            handle_blocked_clients(inp_arr,client_data_list,blocked_clients);
         }
         else if (key_word == "lpush") {
             std::cout << "Handle lpush command" << std::endl;
             handle_lpush_cmd(inp_arr,client_data_list,client_fd);
+            handle_blocked_clients(inp_arr,client_data_list,blocked_clients);
         }
         else if (key_word == "lrange") {
             std::cout << "Handle lrange command" << std::endl;
