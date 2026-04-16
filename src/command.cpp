@@ -315,6 +315,7 @@ void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std:
     if (check == 3) {
         if (check_str_is_double(inp_arr[2]) && check_valid_varname(inp_arr[1])) {
             double blocking_time = std::stod(inp_arr[2]);
+            blocking_time *= 1000;
             struct client_time_data temp_data;
             if (blocking_time == 0) {
                 temp_data.client_fd = client_fd;
@@ -323,7 +324,7 @@ void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std:
             else {
                 temp_data.client_fd = client_fd;
                 temp_data.has_expired = true;
-                temp_data.expired_time = std::chrono::steady_clock::now() + std::chrono::milliseconds(long(blocking_time*1000));
+                temp_data.expired_time = std::chrono::steady_clock::now() + std::chrono::milliseconds(long(blocking_time));
                 blocked_clients.push_back(temp_data);
             }
             if (client_data_list[inp_arr[1]].size() > 0) {
