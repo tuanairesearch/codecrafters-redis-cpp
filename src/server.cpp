@@ -147,7 +147,7 @@ void Server::run() {
         else if (retval == 0) {
             // Time out
             for (int i = 0; i < blocked_clients.size();) {
-                if (blocked_clients[i].has_expired && blocked_clients[i].expired_time < std::chrono::steady_clock::now()) {
+                if (blocked_clients[i].has_expired && blocked_clients[i].expired_time <= std::chrono::steady_clock::now()) {
                     send_resp_string("*-1\r\n",blocked_clients[i].client_fd);
                     for (int j = 0; j < client_fds_.size();) {
                         if (blocked_clients[i].client_fd == client_fds_[j])
