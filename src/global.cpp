@@ -44,7 +44,7 @@ client_time_data nearest_expired (std::deque<client_time_data> &blocked_clients)
     if (blocked_clients.size() > 0) {
         temp = blocked_clients[0];
         for (auto x:blocked_clients) {
-            if (temp.has_expired && x.has_expired && x.expired_time < temp.expired_time)
+            if (x.has_expired && x.expired_time < temp.expired_time)
                 temp = x;
         }
     }
@@ -59,7 +59,7 @@ client_time_data nearest_expired (std::deque<client_time_data> &blocked_clients)
 timeval change_time_to_timeval(client_time_data &time_need_change) {
     if (time_need_change.has_expired) {
         auto duration = time_need_change.expired_time - std::chrono::steady_clock::now();
-        auto mili_sec = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+        long long mili_sec = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
         std::cerr << "ms: " << mili_sec << std::endl;
         if (mili_sec <= 0) {
             return{0,0};
@@ -67,12 +67,11 @@ timeval change_time_to_timeval(client_time_data &time_need_change) {
         else {
             timeval temp;
             temp.tv_sec = mili_sec/1'000'000;
-            temp.tv_usec = mili_sec%1'000'000;
+            temp.tv_usec = mili_sec%1'000'000 + 8;
             return temp;
         }
     }
     else {
         return {0,0};
     }
-
 }

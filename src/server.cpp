@@ -121,8 +121,6 @@ void Server::handleExistingClients(fd_set& readfds) {
     std::cout << std::endl;
 }
 
-int change_time_to_timeval(int _cpp_par_);
-
 void Server::run() {
     std::cout << "Run\n";
     while (true) {
