@@ -4,13 +4,13 @@
 
 #ifndef REDIS_STARTER_CPP_LIST_COMMAND_H
 #define REDIS_STARTER_CPP_LIST_COMMAND_H
-#include "list_command.h"
-#include "command.h"
-#include "global.h"
+#include "./command.h"
+#include "../global.h"
 #include <string>
 #include <iostream>
 #include <vector>
-#include <sys/socket.h>
+
+
 void handle_ping_cmd(int& client_fd);
 void handle_echo_cmd(std::vector<std::string> &inp_arr, int& client_fd);
 void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string, data> &client_data, int &client_fd);

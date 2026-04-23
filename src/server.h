@@ -15,7 +15,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
-#include "command.h"
+#include "command_dir/command.h"
 #include "global.h"
 
 class Server {

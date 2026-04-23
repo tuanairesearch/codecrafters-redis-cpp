@@ -3,15 +3,15 @@
 //
 
 #include "command.h"
-#include "resp_utls.h"
-#include "global.h"
+#include "../resp_utls.h"
+#include "../global.h"
 #include <string>
 #include <iostream>
 #include <vector>
 #include <cstdlib>
 #include <cstring>
 #include <sys/socket.h>
-#include "list_command.h"
+#include "../command_dir/list_command.h"
 
 #include <unordered_map>
 

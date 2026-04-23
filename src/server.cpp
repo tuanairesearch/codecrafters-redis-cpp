@@ -1,7 +1,7 @@
 #include "server.h"
 #include "client.h"
 #include "global.h"
-#include "command.h"
+#include "command_dir/command.h"
 
 #include <arpa/inet.h>
 #include <cstdlib>

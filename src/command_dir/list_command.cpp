@@ -2,13 +2,13 @@
 // Created by tuan on 4/23/26.
 //
 
-#include "list_command.h"
-#include "command.h"
-#include "global.h"
+#include "./command.h"
+#include "../global.h"
 #include <string>
 #include <iostream>
 #include <vector>
 #include <sys/socket.h>
+
 void handle_ping_cmd(int& client_fd) {
     send_resp_string("+PONG\r\n", client_fd);
 }

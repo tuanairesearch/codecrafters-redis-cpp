@@ -17,13 +17,13 @@ add_executable(redis ${SOURCE_FILES}
         src/client.h
         src/resp_utls.cpp
         src/resp_utls.h
-        src/command.h
-        src/command.cpp
+        src/command_dir/command.h
+        src/command_dir/command.cpp
+        src/command_dir/list_command.h
+        src/command_dir/list_command.cpp
         src/client.cpp
         src/global.cpp
         src/global.h
-        src/list_command.cpp
-        src/list_command.h
 )
 
 target_link_libraries(redis PRIVATE asio asio::asio)

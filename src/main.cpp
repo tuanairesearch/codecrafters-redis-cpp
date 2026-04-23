@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <vector>
 #include "client.h"
-#include "command.h"
+#include "command_dir/command.h"
 #include "resp_utls.h"
 #include <unordered_map>
 #include "server.h"

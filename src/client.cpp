@@ -3,7 +3,7 @@
 //
 
 #include "client.h"
-#include "command.h"
+#include "command_dir/command.h"
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <cstring>
