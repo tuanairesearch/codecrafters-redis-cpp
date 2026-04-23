@@ -5,6 +5,7 @@
 #include "command.h"
 #include "../resp_utls.h"
 #include "../global.h"
+#include "stream_command.h"
 #include <string>
 #include <iostream>
 #include <vector>
@@ -184,6 +185,10 @@ void handleInput(const std::string &s, int& client_fd)
         else if (key_word == "blpop") {
             std::cout << "Handle blpop command" << std::endl;
             handle_blpop_cmd(inp_arr, client_data_list,client_fd);
+        }
+        else if (key_word == "type") {
+            std::cout << "Handle type command" << std::endl;
+            handle_type_cmd(inp_arr,client_fd);
         }
         else {
             std::cout << "Handle unkown command" << std::endl;

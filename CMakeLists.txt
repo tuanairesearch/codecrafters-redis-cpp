@@ -24,6 +24,8 @@ add_executable(redis ${SOURCE_FILES}
         src/client.cpp
         src/global.cpp
         src/global.h
+        src/command_dir/stream_command.cpp
+        src/command_dir/stream_command.h
 )
 
 target_link_libraries(redis PRIVATE asio asio::asio)
