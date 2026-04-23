@@ -29,7 +29,7 @@ void handle_type_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
     size_t check = inp_arr.size();
     if (check == 2) {
         std::string result = data_type_of(inp_arr[1]);
-        send_resp_string(result,client_fd);
+        send_resp_string(result.c_str(),client_fd);
     }
     else {
         send_resp_string("-Syntax error. Try TYPE <var_name>\r\n",client_fd);
