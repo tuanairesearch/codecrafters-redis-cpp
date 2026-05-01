@@ -1,7 +1,3 @@
-//
-// Created by tuan on 3/27/26.
-//
-
 #include "global.h"
 
 #include <iostream>
@@ -9,6 +5,26 @@
 #include <vector>
 #include <unordered_map>
 
+// This is Stream data structure
+// Layer 1: name_of_key ----------> unordered_map
+// Layer 2: <id - sequence> ----------> map (due to sequence, use this for speed find arange)
+// Layer 3: vector ----------> store pair<string,string>
+// Layer 4: std::pair<std::string, std:: string>
+// Demo:
+// key_name
+//    |
+//    |___ <id - sequence 1 >
+//                |___________ pair_1 <name, value>
+//                |___________ pair_2 <name, value>
+//                |___________ ...
+//    |___ <id - sequence 2 >
+//                |___________ pair_1 <name, value>
+//                |___________ pair_2 <name, value>
+//                |___________ ...
+
+std::unordered_map<std::string, std::map<StreamID,std::vector<std::pair<std::string, std::string>>>> stream_data;
+
+//*****************************************************************************************************************
 // Explain about how data store in client_data_string
 /*
  *   var_name1   var_name...          <unordered_map> -> also do not know the var name

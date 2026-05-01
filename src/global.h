@@ -8,6 +8,7 @@
 #include <deque>
 #include <unordered_map>
 #include <string>
+#include <map>
 #include <vector>
 
 struct data {
@@ -23,7 +24,27 @@ struct client_time_data {
     std::chrono::steady_clock::time_point expired_time;
 };
 
-
+struct StreamID {
+    uint64_t stream_id;
+    uint64_t sequence_number = -1;
+    StreamID() {
+        auto time_now = std::chrono::system_clock::now();
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_now.time_since_epoch()).count();
+        stream_id = ms;
+    }
+    StreamID(uint64_t stream_id) {
+        this->stream_id = stream_id;
+    }
+    StreamID(uint64_t stream_id, uint64_t sequence_number) {
+        this->stream_id = stream_id;
+        this->sequence_number = sequence_number;
+    }
+    bool operator<(const StreamID &other) const{
+        if (stream_id != other.stream_id) return stream_id < other.stream_id;
+        return sequence_number < other.sequence_number;
+    }
+};
+extern std::unordered_map<std::string, std::map<StreamID,std::vector<std::pair<std::string, std::string>>>> stream_data;
 
 extern std::deque<client_time_data> blocked_clients;
 
