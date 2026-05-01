@@ -151,11 +151,15 @@ void handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
             }
             if (check_valid_id_seq(key_name,stream_id)) {
                 add_StreamID(key_name,stream_id,arr);
+                send_resp_string(inp_arr[2],client_fd);
             }
-            send_resp_string(inp_arr[2],client_fd);
+            else {
+                send_resp_string("-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n", client_fd);
+            }
         }
         else {
             // Handle error
+            send_resp_string("-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n", client_fd);
         }
     }
 }
