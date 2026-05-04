@@ -18,14 +18,12 @@
 std::string data_type_of(std::string var_name) {
     {
         auto x = client_data_string.find(var_name);
-        //std::cout <<"Size of client_data_list: " << client_data_list.size() << std::endl;
         if (x != client_data_string.end()) {
             return "string";
         }
     }
     {
         auto x = stream_data.find(var_name);
-        //std::cout <<"Size of client_data_list: " << client_data_list.size() << std::endl;
         if (x != stream_data.end()) {
             return "stream";
         }
@@ -54,11 +52,14 @@ bool check_valid_id_seq(std::string key_name, StreamID inp) {
 StreamID make_id_seq(std::string key_name, std::string key_value) {
     StreamID stream_id;
     auto it = stream_data[key_name].rbegin();
+
+    // handle 0-0 case seperately
     if (key_value == "0-0")
     {
         stream_id.stream_id = 0;
         stream_id.sequence_number = 0;
     }
+    // hanle * input -> system automaticly create valid id-seq
     else if (key_value == "*") {
         if (stream_data[key_name].empty())
         {
@@ -78,13 +79,16 @@ StreamID make_id_seq(std::string key_name, std::string key_value) {
             }
         }
     }
+    // hanlde id - * and id - seq
     else {
         size_t pos = key_value.find("-");
         std::string ms_str = key_value.substr(0,pos);
         std::string seq_str = key_value.substr(pos + 1, key_value.length() - pos);
+
         // id - *
         if (seq_str == "*" && check_str_is_int(ms_str)) {
             stream_id.stream_id = std::stoll(ms_str);
+            // data is empty -> just add
             if (stream_data[key_name].empty()) {
                 stream_id.sequence_number = 0;
             }
@@ -112,42 +116,18 @@ StreamID make_id_seq(std::string key_name, std::string key_value) {
             }
         }
     }
+    /*
+     * output maybe
+     * 0-0
+     * id-seq
+     * -1 - ? -> fail signal
+     *
+     */
     return stream_id;
 }
 
 
 // Helper
-
-// void add_StreamID(std::string key_name, StreamID stream_id, std::vector<std::pair<std::string, std::string>> pair_data) {
-//     if (stream_data[key_name].empty()) {
-//         stream_data[key_name].insert({stream_id, pair_data});
-//     }
-//     else {
-//         auto it = stream_data[key_name].rbegin();
-//         if (stream_id.sequence_number == -1) {
-//             if (stream_id.stream_id < (it->first).stream_id) {
-//                 stream_id.sequence_number = 0;
-//             }
-//             else if (stream_id.stream_id == (it->first).stream_id) {
-//                 stream_id.sequence_number = (it->first).sequence_number + 1;
-//             }
-//             else {
-//                 // Handle error
-//                 std::cerr << "Error 1 at add StreamID" << std::endl;
-//                 return;
-//             }
-//             stream_data[key_name].insert({stream_id, pair_data});
-//         }
-//         else if ((it->first) < stream_id) {
-//             stream_data[key_name].insert({stream_id, pair_data});
-//         }
-//         else {
-//             std::cerr << "Error 2 at add StreamID" << std::endl;
-//             return;
-//         }
-//     }
-//
-// }
 
 void handle_type_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
     size_t check = inp_arr.size();
