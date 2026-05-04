@@ -106,8 +106,8 @@ StreamID make_id_seq(std::string key_name, std::string key_value) {
                 stream_id.stream_id = -1;
             }
         }
-        return stream_id;
     }
+    return stream_id;
 }
 
 
@@ -171,7 +171,11 @@ void handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
         }
         // Create ID-SEQ
         StreamID stream_id = make_id_seq(key_name, key_value);
-        if (stream_id.stream_id != -1)
+        if (stream_id.stream_id == 0 && stream_id.sequence_number == 0)
+        {
+            send_resp_string("-ERR The ID specified in XADD must be greater than 0-0\r\n", client_fd);
+        }
+        else if (stream_id.stream_id != -1)
         {
             stream_data[key_name].insert({stream_id,arr});
             std::string message = std::to_string(stream_id.stream_id) + "-" + std::to_string(stream_id.sequence_number);
