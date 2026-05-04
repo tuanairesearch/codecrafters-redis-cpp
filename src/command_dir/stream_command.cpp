@@ -33,22 +33,7 @@ std::string data_type_of(std::string var_name) {
 
 // Checking helper
 
-bool check_valid_id_seq(std::string key_name, StreamID inp) {
-    if (stream_data[key_name].empty())
-        return true;
-    else {
-        auto x = stream_data[key_name].rbegin();
-        if (x->first < inp) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-}
-
-// This check what type of input user enter
-// This can handle
+// This function use to make id-seq base on key_name (name of key) and key_value id-seq user input
 StreamID make_id_seq(std::string key_name, std::string key_value) {
     StreamID stream_id;
     auto it = stream_data[key_name].rbegin();
@@ -120,8 +105,7 @@ StreamID make_id_seq(std::string key_name, std::string key_value) {
      * output maybe
      * 0-0
      * id-seq
-     * -1 - ? -> fail signal
-     *
+     * -1 - ? -> #fail signal
      */
     return stream_id;
 }
