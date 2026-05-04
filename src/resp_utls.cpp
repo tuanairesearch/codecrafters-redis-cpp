@@ -6,7 +6,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
+//Debug function
 void showRAW(std::string s)
 {
     if(s.length() != 0)
@@ -48,14 +48,17 @@ std::string handleBulkString(const std::string s, int& str_pos)
     length = std::stoi(s.substr(str_pos + 1, first_rn - str_pos - 1));
     str_pos = first_rn;
 
-    std::cout << "Found first \\r\\n at " << first_rn << std::endl;
-    std::cout << "Length is " << length << std::endl;
+    //Debug code
+    //std::cout << "Found first \\r\\n at " << first_rn << std::endl;
+    //std::cout << "Length is " << length << std::endl;
 
     // Find second_rn
     int second_rn = s.find("\r\n", first_rn + 1);
     if(second_rn != s.npos)
     {
-      std::cout << "Found second \\r\\n at " << second_rn << std::endl;
+      //Debug code
+      //std::cout << "Found second \\r\\n at " << second_rn << std::endl;
+
       // Update str_pos to second_rn
       str_pos = second_rn;
 
@@ -63,15 +66,19 @@ std::string handleBulkString(const std::string s, int& str_pos)
       if(second_rn - first_rn - 2 == length)
       {
         std::string result = s.substr(first_rn + 2, length);
-        std::cout << "String = " << result << std::endl;
+        //Debug code
+        //std::cout << "String = " << result << std::endl;
         if (second_rn + 2 < s.length())
         {
           str_pos = second_rn + 2;
-          std::cout << "str_pos change to: " << str_pos << std::endl;
+
+          //Debug code
+          //std::cout << "str_pos change to: " << str_pos << std::endl;
         }
         else
         {
-          std::cout << "str_pos is currently in the end of the string " << str_pos << std::endl;
+          //Debug code
+          //std::cout << "str_pos is currently in the end of the string " << str_pos << std::endl;
         }
         return result;
       }

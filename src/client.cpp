@@ -40,11 +40,11 @@ bool handleClient(int &client_fd) {
     {
         std::cout << "size_of_buffer: " << size_of_buffer << std::endl;
         std::string str_buffer(buffer, size_of_buffer);
-        std::cout << "This is check input" << std::endl;
+        //std::cout << "This is check input" << std::endl;
         //std::cout << "Raw file: " << std::endl;
         //showRAW(str_buffer);
         handleInput(str_buffer, client_fd);
-        std::cout << "End check input" << std::endl;
+        //std::cout << "End check input" << std::endl;
         //send(client_fd, response, strlen(response), 0);
     }
     return true;
