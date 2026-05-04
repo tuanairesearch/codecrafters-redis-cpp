@@ -23,7 +23,7 @@ void handle_echo_cmd(std::vector<std::string> &inp_arr, int& client_fd) {
         send(client_fd, s.c_str(), s.length(),0);
     }
     else {
-        send_resp_string("-Missing filed. Try \"echo <text>\"\r\n",client_fd);
+        send_resp_string("-Missing field. Try \"echo <text>\"\r\n",client_fd);
     }
 }
 
@@ -63,7 +63,7 @@ void handle_get_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::s
         send_resp_string("-Syntax Error. Try \"GET <var_name> <value>\"\r\n",client_fd);
     }
 }
-// Error in code -> wrong behaviour, set is overide data
+
 void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string, data> &client_data, int &client_fd) {
     size_t check = inp_arr.size();
     struct data temp;
@@ -71,12 +71,14 @@ void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::s
     if (check == 3) {
         temp.has_expired = false;
         temp.expired_time = std::chrono::steady_clock::now();
-        client_data.insert({inp_arr[1], temp});
+        client_data[inp_arr[1]] = temp;
         send_resp_string("+OK\r\n",client_fd);
     }
     else if (check == 5) {
         temp.has_expired = true;
         std::string time_promt = toLowerStr(inp_arr[3] );
+        // px = milliseconds duration
+        // ex = seconds duration
         if (time_promt == "px" || time_promt == "ex")
         {
             try {
@@ -94,7 +96,7 @@ void handle_set_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::s
                 send_resp_string("-Out of range\r\n",client_fd);
                 return;
             }
-            client_data.insert({inp_arr[1], temp});
+            client_data[inp_arr[1]] =  temp;
             send_resp_string("+OK\r\n",client_fd);
         }
         else {
@@ -214,7 +216,6 @@ void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std:
                 temp_data.has_expired = true;
                 temp_data.expired_time = std::chrono::steady_clock::now() + duration;
                 temp_data.expired_duration = blocking_time;
-                //blocked_clients.push_back(temp_data);
             }
             if (client_data_list[inp_arr[1]].size() > 0) {
                 client_data_list[inp_arr[1]].pop_front();
