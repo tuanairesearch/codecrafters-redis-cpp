@@ -51,13 +51,55 @@ bool check_valid_id_seq(std::string key_name, StreamID inp) {
 
 // This check what type of input user enter
 // This can handle
-std::pair<std::string, std::string> check_type_of_xadd_input(std::string s) {
-    if (s == "*")
-        return {"*","*"};
+StreamID make_id_seq(std::string key_name, std::string key_value) {
+    StreamID stream_id;
+    auto it = stream_data[key_name].rbegin();
+    if (key_value == "*") {
+        if (stream_data[key_name].empty())
+        {
+            stream_id.sequence_number = 0;
+        }
+        else
+        {
+            if (it->first.stream_id == stream_id.stream_id) {
+                stream_id.sequence_number = it->first.sequence_number + 1;
+            }
+            else if (it->first.stream_id < stream_id.stream_id) {
+                stream_id.sequence_number = 0;
+            }
+            else {
+                stream_id.stream_id = it->first.stream_id;
+                stream_id.sequence_number = it->first.sequence_number + 1;
+            }
+        }
+    }
     else {
-        size_t pos = s.find("-");
-        std::string ms_str = s.substr(0,pos);
-        std::string seq_str = s.substr(pos, s.length() - pos);
+        size_t pos = key_value.find("-");
+        std::string ms_str = key_value.substr(0,pos);
+        std::string seq_str = key_value.substr(pos + 1, key_value.length() - pos);
+        // id - *
+        if (seq_str == "*") {
+            stream_id.stream_id = ;
+            if (stream_data[key_name].empty()) {
+                stream_id.sequence_number = 0;
+            }
+            else {
+                if (it->first.stream_id < stream_id.stream_id) {
+                    stream_id.sequence_number = 0;
+                }
+                if (it->first.stream_id == stream_id.stream_id) {
+                    stream_id.sequence_number = it->first.sequence_number + 1;
+                }
+                else {
+                    // Error
+                }
+            }
+        }
+        else {
+            if (it->first < stream_id)
+
+        }
+
         if (check_str_is_int(ms_str)) {
             if (seq_str == "*") {
                 return {ms_str,seq_str};
