@@ -174,6 +174,8 @@ void handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
         if (stream_id.stream_id != -1)
         {
             stream_data[key_name].insert({stream_id,arr});
+            std::string message = std::to_string(stream_id.stream_id) + "-" + std::to_string(stream_id.sequence_number);
+            send_resp_string(message,client_fd);
         }
         else
         {
