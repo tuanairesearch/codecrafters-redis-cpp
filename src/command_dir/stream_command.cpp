@@ -78,8 +78,8 @@ StreamID make_id_seq(std::string key_name, std::string key_value) {
         std::string ms_str = key_value.substr(0,pos);
         std::string seq_str = key_value.substr(pos + 1, key_value.length() - pos);
         // id - *
-        if (seq_str == "*") {
-            stream_id.stream_id = ;
+        if (seq_str == "*" && check_str_is_int(ms_str)) {
+            stream_id.stream_id = std::stoll(ms_str);
             if (stream_data[key_name].empty()) {
                 stream_id.sequence_number = 0;
             }
@@ -87,73 +87,62 @@ StreamID make_id_seq(std::string key_name, std::string key_value) {
                 if (it->first.stream_id < stream_id.stream_id) {
                     stream_id.sequence_number = 0;
                 }
-                if (it->first.stream_id == stream_id.stream_id) {
+                else if (it->first.stream_id == stream_id.stream_id) {
                     stream_id.sequence_number = it->first.sequence_number + 1;
                 }
                 else {
                     // Error
+                    stream_id.stream_id = -1;
                 }
             }
         }
+        // id - seq
         else {
-            if (it->first < stream_id)
-
-        }
-
-        if (check_str_is_int(ms_str)) {
-            if (seq_str == "*") {
-                return {ms_str,seq_str};
-            }
-            else {
-                if (check_str_is_int(seq_str)) {
-                    return {ms_str,seq_str};
-                }
-                else {
-                    // hanlde invalid seqence (seq)
-                    return {"invalid","invalid"};
-                }
+            stream_id.stream_id = std::stoll(ms_str);
+            stream_id.sequence_number = std::stoll(seq_str);
+            if (!(stream_data[key_name].empty() || it->first < stream_id))
+            {
+                //error
+                stream_id.stream_id = -1;
             }
         }
-        else {
-            // handle invalid id
-            return {"invalid","invalid"};
-        }
+        return stream_id;
     }
 }
 
 
 // Helper
 
-void add_StreamID(std::string key_name, StreamID stream_id, std::vector<std::pair<std::string, std::string>> pair_data) {
-    if (stream_data[key_name].empty()) {
-        stream_data[key_name].insert({stream_id, pair_data});
-    }
-    else {
-        auto it = stream_data[key_name].rbegin();
-        if (stream_id.sequence_number == -1) {
-            if (stream_id.stream_id < (it->first).stream_id) {
-                stream_id.sequence_number = 0;
-            }
-            else if (stream_id.stream_id == (it->first).stream_id) {
-                stream_id.sequence_number = (it->first).sequence_number + 1;
-            }
-            else {
-                // Handle error
-                std::cerr << "Error 1 at add StreamID" << std::endl;
-                return;
-            }
-            stream_data[key_name].insert({stream_id, pair_data});
-        }
-        else if ((it->first) < stream_id) {
-            stream_data[key_name].insert({stream_id, pair_data});
-        }
-        else {
-            std::cerr << "Error 2 at add StreamID" << std::endl;
-            return;
-        }
-    }
-
-}
+// void add_StreamID(std::string key_name, StreamID stream_id, std::vector<std::pair<std::string, std::string>> pair_data) {
+//     if (stream_data[key_name].empty()) {
+//         stream_data[key_name].insert({stream_id, pair_data});
+//     }
+//     else {
+//         auto it = stream_data[key_name].rbegin();
+//         if (stream_id.sequence_number == -1) {
+//             if (stream_id.stream_id < (it->first).stream_id) {
+//                 stream_id.sequence_number = 0;
+//             }
+//             else if (stream_id.stream_id == (it->first).stream_id) {
+//                 stream_id.sequence_number = (it->first).sequence_number + 1;
+//             }
+//             else {
+//                 // Handle error
+//                 std::cerr << "Error 1 at add StreamID" << std::endl;
+//                 return;
+//             }
+//             stream_data[key_name].insert({stream_id, pair_data});
+//         }
+//         else if ((it->first) < stream_id) {
+//             stream_data[key_name].insert({stream_id, pair_data});
+//         }
+//         else {
+//             std::cerr << "Error 2 at add StreamID" << std::endl;
+//             return;
+//         }
+//     }
+//
+// }
 
 void handle_type_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
     size_t check = inp_arr.size();
@@ -170,8 +159,9 @@ void handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
     size_t check = inp_arr.size();
     std::vector<std::pair<std::string, std::string>> arr;
     if (check >= 5 && check % 2 == 1) {
+        // set up key name and key value
         std::string key_name = inp_arr[1];
-        auto input_type = check_type_of_xadd_input(inp_arr[2]);
+        std::string key_value = inp_arr[2];
         // Build vector with data
         for (int i = 3; i < inp_arr.size(); i += 2) {
             std::pair<std::string, std::string> temp_pair;
@@ -179,28 +169,14 @@ void handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
             temp_pair.second = inp_arr[i+1];
             arr.push_back(temp_pair);
         }
-        if (input_type.first != "invalid") {
-            StreamID stream_id;
-            if (input_type.first == "*") {
-
-            }
-            else if (input_type.second == "*") {
-                stream_id.stream_id = std::stoll(input_type.first);
-            }
-            else {
-                stream_id.stream_id = std::stoll(input_type.first);
-                stream_id.sequence_number = std::stoll(input_type.second);
-            }
-            if (check_valid_id_seq(key_name,stream_id)) {
-                add_StreamID(key_name,stream_id,arr);
-                send_resp_string(inp_arr[2],client_fd);
-            }
-            else {
-                send_resp_string("-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n", client_fd);
-            }
+        // Create ID-SEQ
+        StreamID stream_id = make_id_seq(key_name, key_value);
+        if (stream_id.stream_id != -1)
+        {
+            stream_data[key_name].insert({stream_id,arr});
         }
-        else {
-            // Handle error
+        else
+        {
             send_resp_string("-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n", client_fd);
         }
     }
