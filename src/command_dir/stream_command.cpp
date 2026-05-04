@@ -54,7 +54,12 @@ bool check_valid_id_seq(std::string key_name, StreamID inp) {
 StreamID make_id_seq(std::string key_name, std::string key_value) {
     StreamID stream_id;
     auto it = stream_data[key_name].rbegin();
-    if (key_value == "*") {
+    if (key_value == "0-0")
+    {
+        stream_id.stream_id = 0;
+        stream_id.sequence_number = 0;
+    }
+    else if (key_value == "*") {
         if (stream_data[key_name].empty())
         {
             stream_id.sequence_number = 0;
