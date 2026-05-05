@@ -194,6 +194,11 @@ void handleInput(const std::string &s, int& client_fd)
             std::cout << "Handle xadd command" << std::endl;
             handle_xadd_cmd(inp_arr,client_fd);
         }
+        else if (key_word == "xrange")
+        {
+            std::cout << "Handle xrange command" << std::endl;
+            handle_xrange_cmd(inp_arr, client_fd);
+        }
         else {
             std::cout << "Handle unkown command" << std::endl;
             handle_unknown_cmd(client_fd);

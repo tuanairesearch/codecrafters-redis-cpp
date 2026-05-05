@@ -26,7 +26,7 @@ struct client_time_data {
 
 struct StreamID {
     uint64_t stream_id;
-    uint64_t sequence_number = -1;
+    uint64_t sequence_number = 0;
     StreamID() {
         auto time_now = std::chrono::system_clock::now();
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_now.time_since_epoch()).count();
@@ -38,6 +38,10 @@ struct StreamID {
     StreamID(uint64_t stream_id, uint64_t sequence_number) {
         this->stream_id = stream_id;
         this->sequence_number = sequence_number;
+    }
+    std::string to_str() const
+    {
+        return std::to_string(stream_id) + "-" + std::to_string(sequence_number);
     }
     bool operator<(const StreamID &other) const{
         if (stream_id != other.stream_id) return stream_id < other.stream_id;

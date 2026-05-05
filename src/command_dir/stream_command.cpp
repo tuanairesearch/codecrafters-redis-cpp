@@ -31,17 +31,21 @@ std::string data_type_of(std::string var_name) {
     return "none";
 }
 
+
+
 // Checking helper
 
+
+
 // This function use to make id-seq base on key_name (name of key) and key_value id-seq user input
-StreamID make_id_seq(std::string key_name, std::string key_value) {
+StreamID make_id_seq(std::string stream_name, std::string value) {
     StreamID stream_id;
-    auto it = stream_data[key_name].rbegin();
+    auto it = stream_data[stream_name].rbegin();
 
     // handle 0-0 case seperately
     // hanle * input -> system automaticly create valid id-seq
-    if (key_value == "*") {
-        if (stream_data[key_name].empty())
+    if (value == "*") {
+        if (stream_data[stream_name].empty())
         {
             stream_id.sequence_number = 0;
         }
@@ -61,15 +65,15 @@ StreamID make_id_seq(std::string key_name, std::string key_value) {
     }
     // hanlde id - * and id - seq
     else {
-        size_t pos = key_value.find("-");
-        std::string ms_str = key_value.substr(0,pos);
-        std::string seq_str = key_value.substr(pos + 1, key_value.length() - pos);
+        size_t pos = value.find("-");
+        std::string ms_str = value.substr(0,pos);
+        std::string seq_str = value.substr(pos + 1, value.length() - pos);
 
         // id - *
         if (seq_str == "*" && check_str_is_int(ms_str)) {
             stream_id.stream_id = std::stoll(ms_str);
             // data is empty -> just add
-            if (stream_data[key_name].empty()) {
+            if (stream_data[stream_name].empty()) {
                 stream_id.sequence_number = 0;
             }
             else {
@@ -89,14 +93,14 @@ StreamID make_id_seq(std::string key_name, std::string key_value) {
         else {
             stream_id.stream_id = std::stoll(ms_str);
             stream_id.sequence_number = std::stoll(seq_str);
-            if (!(stream_data[key_name].empty() || it->first < stream_id))
+            if (!(stream_data[stream_name].empty() || it->first < stream_id))
             {
                 //error
                 stream_id.stream_id = -1;
             }
         }
     }
-    if (key_value == "0-0")
+    if (value == "0-0")
     {
         stream_id.stream_id = 0;
         stream_id.sequence_number = 0;
@@ -117,6 +121,86 @@ StreamID make_id_seq(std::string key_name, std::string key_value) {
 
 // Helper
 
+std::string cstr_to_redis_str(std::string s)
+{
+    uint8_t length = s.length();
+    return "$" + std::to_string(length) + "\r\n" + s + "\r\n";
+}
+
+std::string build_array_from_vector(std::vector<std::pair<std::string,std::string>> &arr)
+{
+    std::string result = "";
+    int arr_size = arr.size() * 2;
+    result = result + "*" + std::to_string(arr_size) + "\r\n";
+    for (auto x:arr)
+    {
+        result += cstr_to_redis_str(x.first);
+        result += cstr_to_redis_str(x.second);
+    }
+    return result;
+}
+
+std::string build_arr_from_map_pair(std::pair<const StreamID , std::vector<std::pair<std::string, std::string>>> &data)
+{
+    std::string result = "";
+    result = "*2\r\n";
+    result = result + cstr_to_redis_str(data.first.to_str()) + build_array_from_vector(data.second);
+    return result;
+}
+
+std::string build_output_from_map(
+    std::map<StreamID,std::vector<std::pair<std::string, std::string>>>::iterator begin,
+    std::map<StreamID,std::vector<std::pair<std::string, std::string>>>::iterator end)
+{
+    int count = 0;
+    std::string result = "";
+    for (auto it = begin; it != end; it++)
+    {
+        result = result + build_arr_from_map_pair(*it);
+        count++;
+    }
+    result = "*" + std::to_string(count) + "\r\n" + result;
+    return result;
+}
+
+
+// this function need checked input
+StreamID translate_start_end_xrange(std::string &value)
+{
+    // '-' mean 0-1
+    // '+' mean 18446744073709551615-18446744073709551615 (max of uint64_t)
+    // return stoll(value)
+    StreamID result;
+    if (value == "-")
+    {
+        result.stream_id = 0;
+        result.sequence_number = 1;
+    }
+    else if (value == "+")
+    {
+        // this will go to end of data type
+        result.stream_id = -1;
+        result.sequence_number = -1;
+    }
+    else
+    {
+        size_t pos = value.find("-");
+        std::string ms_str = value.substr(0,pos);
+        std::string seq_str = value.substr(pos + 1, value.length() - pos);
+        if (check_str_is_int(ms_str) && check_str_is_int(seq_str))
+        {
+            result.stream_id = std::stoll(ms_str);
+            result.sequence_number = std::stoll(seq_str);
+        }
+        else
+        {
+            result.stream_id = 0;
+            result.stream_id = 0;
+        }
+    }
+    return result;
+}
+
 void handle_type_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
     size_t check = inp_arr.size();
     if (check == 2) {
@@ -133,7 +217,7 @@ void handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
     std::vector<std::pair<std::string, std::string>> arr;
     if (check >= 5 && check % 2 == 1) {
         // set up key name and key value
-        std::string key_name = inp_arr[1];
+        std::string stream_name = inp_arr[1];
         std::string key_value = inp_arr[2];
         // Build vector with data
         for (int i = 3; i < inp_arr.size(); i += 2) {
@@ -143,20 +227,49 @@ void handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
             arr.push_back(temp_pair);
         }
         // Create ID-SEQ
-        StreamID stream_id = make_id_seq(key_name, key_value);
+        StreamID stream_id = make_id_seq(stream_name, key_value);
         if (stream_id.stream_id == 0 && stream_id.sequence_number == 0)
         {
             send_resp_string("-ERR The ID specified in XADD must be greater than 0-0\r\n", client_fd);
         }
         else if (stream_id.stream_id != -1)
         {
-            stream_data[key_name].insert({stream_id,arr});
+            stream_data[stream_name].insert({stream_id,arr});
             std::string message = std::to_string(stream_id.stream_id) + "-" + std::to_string(stream_id.sequence_number);
             send_resp_string(message,client_fd);
         }
         else
         {
             send_resp_string("-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n", client_fd);
+        }
+    }
+}
+
+void handle_xrange_cmd(std::vector<std::string> &inp_arr,int& client_fd)
+{
+    size_t check = inp_arr.size();
+    if (check == 4)
+    {
+        std::string stream_name = inp_arr[1];
+        if (stream_data[stream_name].empty())
+        {
+            send_resp_string("*0\r\n", client_fd);
+        }
+        else
+        {
+            StreamID start_id = translate_start_end_xrange(inp_arr[2]);
+            StreamID end_id = translate_start_end_xrange(inp_arr[3]);
+            if (!((start_id.stream_id == 0 && start_id.sequence_number == 0) || (end_id.stream_id == 0 && end_id.sequence_number == 0)))
+            {
+                auto start_ptr = stream_data[inp_arr[1]].lower_bound(start_id);
+                auto end_ptr = stream_data[inp_arr[1]].upper_bound(end_id);
+                std::string result = build_output_from_map(start_ptr, end_ptr);
+                send_resp_string(result.c_str(),client_fd);
+            }
+            else
+            {
+                send_resp_string("-Invalid range\r\n",client_fd);
+            }
         }
     }
 }
