@@ -96,7 +96,12 @@ StreamID make_id_seq(std::string key_name, std::string key_value) {
             }
         }
     }
-    if (!(key_name == "0-0") && stream_id.stream_id == 0 && stream_id.sequence_number == 0)
+    if (key_value == "0-0")
+    {
+        stream_id.stream_id = 0;
+        stream_id.sequence_number = 0;
+    }
+    else if (stream_id.stream_id == 0 && stream_id.sequence_number == 0)
     {
         stream_id.sequence_number = 1;
     }
