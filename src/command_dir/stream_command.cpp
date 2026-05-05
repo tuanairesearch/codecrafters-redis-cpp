@@ -39,13 +39,8 @@ StreamID make_id_seq(std::string key_name, std::string key_value) {
     auto it = stream_data[key_name].rbegin();
 
     // handle 0-0 case seperately
-    if (key_value == "0-0")
-    {
-        stream_id.stream_id = 0;
-        stream_id.sequence_number = 0;
-    }
     // hanle * input -> system automaticly create valid id-seq
-    else if (key_value == "*") {
+    if (key_value == "*") {
         if (stream_data[key_name].empty())
         {
             stream_id.sequence_number = 0;
@@ -100,6 +95,10 @@ StreamID make_id_seq(std::string key_name, std::string key_value) {
                 stream_id.stream_id = -1;
             }
         }
+    }
+    if (key_value == "*" && stream_id.stream_id == 0 && stream_id.sequence_number == 0)
+    {
+        stream_id.sequence_number = 1;
     }
     /*
      * output maybe
