@@ -200,7 +200,7 @@ StreamID translate_start_end_xrange(std::string &value)
     return result;
 }
 
-StreamID translate_start_end_xread(std::string &value)
+StreamID translate_start_end_xread(std::string value)
 {
     // '$' mean end of stream
     // return stoll(value)
@@ -318,7 +318,7 @@ void handle_xrange_cmd(std::vector<std::string> &inp_arr,int& client_fd)
 
 void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
 {
-    size_t check = inp_arr.capacity();
+    size_t check = inp_arr.size();
     if (check % 2 == 0)
     {
         // Hanlde non-blocking
@@ -342,7 +342,6 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                 temp.first = inp_arr[i + 2];
                 // id-seq
                 temp.second = inp_arr[i + 2 + number_of_key];
-
                 StreamID start_id = translate_start_end_xread(temp.second);
                 auto start_ptr = stream_data[temp.first].lower_bound(start_id);
                 auto end_ptr = stream_data[temp.first].end();
