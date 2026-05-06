@@ -163,7 +163,6 @@ std::string build_output_from_map(
     return result;
 }
 
-
 // this function need checked input
 StreamID translate_start_end_xrange(std::string &value)
 {
@@ -195,7 +194,50 @@ StreamID translate_start_end_xrange(std::string &value)
         else
         {
             result.stream_id = 0;
-            result.stream_id = 0;
+            result.sequence_number = 0;
+        }
+    }
+    return result;
+}
+
+StreamID translate_start_end_xread(std::string &value)
+{
+    // '$' mean end of stream
+    // return stoll(value)
+    StreamID result;
+    if (value != "$")
+    {
+        // there are two cases
+        // 1) <id>-<seq>
+        // 2) <id> (only)
+        if (value.find("-") != std::string::npos)
+        {
+            size_t pos = value.find("-");
+            std::string ms_str = value.substr(0,pos);
+            std::string seq_str = value.substr(pos + 1, value.length() - pos);
+            if (check_str_is_int(ms_str) && check_str_is_int(seq_str))
+            {
+                result.stream_id = std::stoll(ms_str);
+                result.sequence_number = std::stoll(seq_str);
+            }
+            else
+            {
+                result.stream_id = -1;
+                result.sequence_number = -1;
+            }
+        }
+        else
+        {
+            if (check_str_is_int(value))
+            {
+                result.stream_id = std::stoll(value);
+                result.sequence_number = 0;
+            }
+            else
+            {
+                result.stream_id = -1;
+                result.sequence_number = -1;
+            }
         }
     }
     return result;
@@ -270,6 +312,49 @@ void handle_xrange_cmd(std::vector<std::string> &inp_arr,int& client_fd)
             {
                 send_resp_string("-Invalid range\r\n",client_fd);
             }
+        }
+    }
+}
+
+void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
+{
+    size_t check = inp_arr.capacity();
+    if (check % 2 == 0)
+    {
+        // Hanlde non-blocking
+        // This can be multi key and id
+        if("streams" == toLowerStr(inp_arr[1]))
+        {
+            // each element
+            // first -> key_name
+            // second -> id
+            // XREAD STREAM <key1> <key2> <key3> <id1> <id2> <id3>
+            //                ^                    ^
+            //                |--(arr_inpt - 2)/2--|
+            std::vector<std::pair<std::string, std::string>> vector_result;
+            size_t number_of_key = (check - 2)/2;
+            std::pair<std::string, std::string> temp;
+            std::string result = "";
+            int count = 0;
+            for (int i = 0; i < number_of_key; i++)
+            {
+                // key_name
+                temp.first = inp_arr[i + 2];
+                // id-seq
+                temp.second = inp_arr[i + 2 + number_of_key];
+
+                StreamID start_id = translate_start_end_xread(temp.second);
+                auto start_ptr = stream_data[temp.first].lower_bound(start_id);
+                auto end_ptr = stream_data[temp.first].end();
+                std::string temp_data = build_output_from_map(start_ptr,end_ptr);
+                if (temp_data != "*0\r\n")
+                {
+                    result = result + "*2\r\n" + cstr_to_redis_str(temp.first) + temp_data;
+                    count++;
+                }
+            }
+            result = "*" + std::to_string(count) + "\r\n" + result;
+            send_resp_string(result.c_str(),client_fd);
         }
     }
 }

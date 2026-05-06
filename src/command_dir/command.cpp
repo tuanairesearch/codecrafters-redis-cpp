@@ -199,6 +199,11 @@ void handleInput(const std::string &s, int& client_fd)
             std::cout << "Handle xrange command" << std::endl;
             handle_xrange_cmd(inp_arr, client_fd);
         }
+        else if (key_word == "xread")
+        {
+            std::cout << "Handle xread command" << std::endl;
+            handle_xread_cmd(inp_arr, client_fd);
+        }
         else {
             std::cout << "Handle unkown command" << std::endl;
             handle_unknown_cmd(client_fd);
