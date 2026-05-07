@@ -193,7 +193,7 @@ void handleInput(const std::string &s, int& client_fd)
         else if (key_word == "xadd") {
             std::cout << "Handle xadd command" << std::endl;
             handle_xadd_cmd(inp_arr,client_fd);
-            handle_blocked_stream_clients(inp_arr, client_fd);
+            handle_blocked_stream_clients(inp_arr);
         }
         else if (key_word == "xrange")
         {
