@@ -200,7 +200,7 @@ StreamID translate_start_end_xrange(std::string &value)
     return result;
 }
 
-StreamID translate_start_end_xread(std::string value)
+StreamID translate_start_end_xread(std::string value, std::string key_name)
 {
     // '$' mean end of stream
     // return stoll(value)
@@ -238,6 +238,16 @@ StreamID translate_start_end_xread(std::string value)
                 result.stream_id = -1;
                 result.sequence_number = -1;
             }
+        }
+    }
+    else
+    {
+        if (!stream_data[key_name].empty())
+            result = stream_data[key_name].rend()->first;
+        else
+        {
+            result.stream_id = 0;
+            result.sequence_number = 0;
         }
     }
     return result;
@@ -343,7 +353,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                 // id-seq
                 temp.second = inp_arr[i + 2 + number_of_key];
 
-                StreamID start_id = translate_start_end_xread(temp.second);
+                StreamID start_id = translate_start_end_xread(temp.second, temp.first);
                 auto start_ptr = stream_data[temp.first].upper_bound(start_id);
                 auto end_ptr = stream_data[temp.first].end();
                 std::string temp_data = build_output_from_map(start_ptr,end_ptr);
@@ -368,7 +378,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
             {
                 uint64_t blocking_time = std::stoll(time);
 
-                StreamID start_id = translate_start_end_xread(id);
+                StreamID start_id = translate_start_end_xread(id, key);
                 auto start_ptr = stream_data[key].upper_bound(start_id);
                 auto end_ptr = stream_data[key].end();
                 std::string result = build_output_from_map(start_ptr,end_ptr);
@@ -379,7 +389,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                     {
                         // Block forever
                         blocked_client temp;
-                        temp.stream_id = translate_start_end_xread(id);
+                        temp.stream_id = translate_start_end_xread(id,key);
                         temp.client_fd = client_fd;
                         temp.type = 1;
                         temp.stream_key = key;
@@ -390,7 +400,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                     {
                         // Block for blocking_time
                         blocked_client temp;
-                        temp.stream_id = translate_start_end_xread(id);
+                        temp.stream_id = translate_start_end_xread(id,key);
                         temp.client_fd = client_fd;
                         temp.type = 1;
                         temp.stream_key = key;
