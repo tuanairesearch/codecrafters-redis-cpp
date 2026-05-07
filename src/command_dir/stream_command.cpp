@@ -344,7 +344,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                 temp.second = inp_arr[i + 2 + number_of_key];
 
                 StreamID start_id = translate_start_end_xread(temp.second);
-                auto start_ptr = stream_data[temp.first].lower_bound(start_id);
+                auto start_ptr = stream_data[temp.first].upper_bound(start_id);
                 auto end_ptr = stream_data[temp.first].end();
                 std::string temp_data = build_output_from_map(start_ptr,end_ptr);
                 if (temp_data != "*0\r\n")
@@ -369,7 +369,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                 uint64_t blocking_time = std::stoll(time);
 
                 StreamID start_id = translate_start_end_xread(id);
-                auto start_ptr = stream_data[key].lower_bound(start_id);
+                auto start_ptr = stream_data[key].upper_bound(start_id);
                 auto end_ptr = stream_data[key].end();
                 std::string result = build_output_from_map(start_ptr,end_ptr);
                 if (result == "*0\r\n")
@@ -421,7 +421,7 @@ void handle_blocked_stream_clients(std::vector<std::string> &inp_arr) {
     {
         if (x.type == 1)
         {
-            auto start_ptr = stream_data[x.stream_key].lower_bound(x.stream_id);
+            auto start_ptr = stream_data[x.stream_key].upper_bound(x.stream_id);
             auto end_ptr = stream_data[x.stream_key].end();
             std::string temp_data = build_output_from_map(start_ptr,end_ptr);
             if (temp_data != "*0\r\n")
