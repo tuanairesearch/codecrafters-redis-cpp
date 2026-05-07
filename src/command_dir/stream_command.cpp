@@ -378,6 +378,13 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                     if (blocking_time == 0)
                     {
                         // Block forever
+                        blocked_client temp;
+                        temp.stream_id = translate_start_end_xread(id);
+                        temp.client_fd = client_fd;
+                        temp.type = 1;
+                        temp.stream_key = key;
+                        temp.expired_time = std::chrono::steady_clock::time_point::max();
+                        blocked_clients2.push_back(temp);
                     }
                     else
                     {
