@@ -386,6 +386,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                         temp.stream_id = translate_start_end_xread(id);
                         temp.client_fd = client_fd;
                         temp.type = 1;
+                        temp.stream_key = key;
 
                         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<uint64_t, std::milli>(blocking_time));
                         temp.expired_time = std::chrono::steady_clock::now() + duration;
@@ -411,5 +412,23 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
     else
     {
         //error
+    }
+}
+
+void handle_blocked_stream_clients(std::vector<std::string> &inp_arr, int& client_fd) {
+    int count = 0;
+    for (auto x:blocked_clients2)
+    {
+        if (x.type == 1)
+        {
+            auto start_ptr = stream_data[x.stream_key].lower_bound(x.stream_id);
+            auto end_ptr = stream_data[x.stream_key].end();
+            std::string temp_data = build_output_from_map(start_ptr,end_ptr);
+            if (temp_data != "*0\r\n")
+            {
+                std::string result = "*1\r\n*2\r\n" + cstr_to_redis_str(x.stream_key) + temp_data;
+                send_resp_string(result, client_fd);
+            }
+        }
     }
 }

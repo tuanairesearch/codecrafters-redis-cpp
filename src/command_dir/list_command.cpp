@@ -236,7 +236,7 @@ void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std:
     }
 }
 
-void handle_blocked_clients(std::vector<std::string> &inp_arr,
+void handle_blocked_list_clients(std::vector<std::string> &inp_arr,
     std::unordered_map<std::string,std::deque<std::string>> &client_data_list,std::deque<client_time_data> &blocked_clients) {
     while (blocked_clients.size() > 0 && client_data_list[inp_arr[1]].size() > 0) {
         std::deque<std::string> my_list;

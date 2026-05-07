@@ -12,4 +12,5 @@ void handle_type_cmd(std::vector<std::string> &inp_arr,int& client_fd);
 void handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd);
 void handle_xrange_cmd(std::vector<std::string> &inp_arr,int& client_fd);
 void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd);
+void handle_blocked_stream_clients(std::vector<std::string> &inp_arr, int& client_fd);
 #endif //REDIS_STARTER_CPP_STREAM_COMMAND_H

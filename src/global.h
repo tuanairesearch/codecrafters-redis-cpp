@@ -70,6 +70,7 @@ struct blocked_client
 
     // If type = 1, there is addition property
     StreamID stream_id;
+    std::string stream_key;
 
 };
 extern std::unordered_map<std::string, std::map<StreamID,std::vector<std::pair<std::string, std::string>>>> stream_data;
