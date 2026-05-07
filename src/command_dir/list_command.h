@@ -20,8 +20,9 @@ void handle_lpush_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std:
 void handle_llen_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd);
 void handle_lpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd);
 void handle_lrange_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd);
-void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd);
-void handle_blocked_list_clients(std::vector<std::string> &inp_arr,
-    std::unordered_map<std::string,std::deque<std::string>> &client_data_list,std::deque<client_time_data> &blocked_clients);
+void handle_blpop_cmd(std::vector<std::string> &inp_arr, int& client_fd);
+void handle_blocked_list_clients(std::vector<std::string> &inp_arr,int left_or_right, int &client_fd);
+//void handle_blocked_list_clients(std::vector<std::string> &inp_arr,
+    //std::unordered_map<std::string,std::deque<std::string>> &client_data_list,std::deque<client_time_data> &blocked_clients);
 
 #endif //REDIS_STARTER_CPP_LIST_COMMAND_H

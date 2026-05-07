@@ -416,7 +416,6 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
 }
 
 void handle_blocked_stream_clients(std::vector<std::string> &inp_arr) {
-    int count = 0;
     for (auto x:blocked_clients2)
     {
         if (x.type == 1)

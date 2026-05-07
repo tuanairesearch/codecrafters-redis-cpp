@@ -163,12 +163,12 @@ void handleInput(const std::string &s, int& client_fd)
         else if (key_word == "rpush") {
             std::cout << "Handle rpush command" << std::endl;
             handle_rpush_cmd(inp_arr,client_data_list,client_fd);
-            handle_blocked_list_clients(inp_arr,client_data_list,blocked_clients);
+            handle_blocked_list_clients(inp_arr, 0,client_fd);
         }
         else if (key_word == "lpush") {
             std::cout << "Handle lpush command" << std::endl;
             handle_lpush_cmd(inp_arr,client_data_list,client_fd);
-            handle_blocked_list_clients(inp_arr,client_data_list,blocked_clients);
+            handle_blocked_list_clients(inp_arr, 1,client_fd);
         }
         else if (key_word == "lrange") {
             std::cout << "Handle lrange command" << std::endl;
@@ -184,7 +184,7 @@ void handleInput(const std::string &s, int& client_fd)
         }
         else if (key_word == "blpop") {
             std::cout << "Handle blpop command" << std::endl;
-            handle_blpop_cmd(inp_arr, client_data_list,client_fd);
+            handle_blpop_cmd(inp_arr,client_fd);
         }
         else if (key_word == "type") {
             std::cout << "Handle type command" << std::endl;
