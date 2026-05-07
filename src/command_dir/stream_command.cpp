@@ -149,8 +149,8 @@ std::string build_arr_from_map_pair(std::pair<const StreamID , std::vector<std::
 }
 
 std::string build_output_from_map(
-    std::map<StreamID,std::vector<std::pair<std::string, std::string>>>::iterator begin,
-    std::map<StreamID,std::vector<std::pair<std::string, std::string>>>::iterator end)
+    std::map<StreamID,std::vector<std::pair<std::string, std::string>>>::iterator &begin,
+    std::map<StreamID,std::vector<std::pair<std::string, std::string>>>::iterator &end)
 {
     int count = 0;
     std::string result = "";
@@ -342,6 +342,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                 temp.first = inp_arr[i + 2];
                 // id-seq
                 temp.second = inp_arr[i + 2 + number_of_key];
+
                 StreamID start_id = translate_start_end_xread(temp.second);
                 auto start_ptr = stream_data[temp.first].lower_bound(start_id);
                 auto end_ptr = stream_data[temp.first].end();
@@ -355,5 +356,60 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
             result = "*" + std::to_string(count) + "\r\n" + result;
             send_resp_string(result.c_str(),client_fd);
         }
+        else if ("block" == toLowerStr(inp_arr[1]) && check == 6)
+        {
+            // syntax:
+            // XREAD BLOCK <time> STREAMS <key> <id>
+
+            std::string const &time = inp_arr[2];
+            std::string const &key = inp_arr[4];
+            std::string const &id = inp_arr[5];
+            if (check_str_is_int(time))
+            {
+                uint64_t blocking_time = std::stoll(time);
+
+                StreamID start_id = translate_start_end_xread(id);
+                auto start_ptr = stream_data[key].lower_bound(start_id);
+                auto end_ptr = stream_data[key].end();
+                std::string result = build_output_from_map(start_ptr,end_ptr);
+                if (result == "*0\r\n")
+                {
+                    // blocking
+                    if (blocking_time == 0)
+                    {
+                        // Block forever
+                    }
+                    else
+                    {
+                        // Block for blocking_time
+                        blocked_client temp;
+                        temp.stream_id = translate_start_end_xread(id);
+                        temp.client_fd = client_fd;
+                        temp.type = 1;
+
+                        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<uint64_t, std::milli>(blocking_time));
+                        temp.expired_time = std::chrono::steady_clock::now() + duration;
+                        blocked_clients2.push_back(temp);
+                    }
+                }
+                else
+                {
+                    result = "*1\r\n*2\r\n" + cstr_to_redis_str(key) + result;
+
+                }
+            }
+            else
+            {
+                // time error
+            }
+        }
+        else
+        {
+            //error
+        }
+    }
+    else
+    {
+        //error
     }
 }

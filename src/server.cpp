@@ -127,9 +127,9 @@ void Server::run() {
         std::cout << "In While\n";
         int max_fd = server_fd_;
         fd_set readfds = buildFdSet(max_fd);
-        auto nearest_time = nearest_expired(blocked_clients);
+        blocked_client nearest_time = nearest_expired();
         int retval;
-        if (blocked_clients.size() == 0 || nearest_time.has_expired == false) {
+        if (nearest_time.client_fd == -1) {
             retval=select(max_fd + 1, &readfds, NULL, NULL, NULL);
         }
         else {
@@ -142,16 +142,16 @@ void Server::run() {
         }
         else if (retval == 0) {
             // Time out
-            for (int i = 0; i < blocked_clients.size();) {
-                if (blocked_clients[i].has_expired && blocked_clients[i].expired_time <= std::chrono::steady_clock::now()) {
-                    send_resp_string("*-1\r\n",blocked_clients[i].client_fd);
+            for (int i = 0; i < blocked_clients2.size();) {
+                if (blocked_clients2[i].expired_time <= std::chrono::steady_clock::now()) {
+                    send_resp_string("*-1\r\n", blocked_clients2[i].client_fd);
                     for (int j = 0; j < client_fds_.size();) {
-                        if (blocked_clients[i].client_fd == client_fds_[j])
+                        if (blocked_clients2[i].client_fd == client_fds_[j])
                             client_fds_.erase(client_fds_.begin()+j);
                         else
                             j++;
                     }
-                    blocked_clients.erase(blocked_clients.begin()+i);
+                    blocked_clients2.erase(blocked_clients2.begin()+i);
                 }
                 else {
                     i++;

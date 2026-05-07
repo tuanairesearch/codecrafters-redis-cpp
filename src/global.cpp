@@ -55,7 +55,70 @@ std::unordered_map<std::string,std::deque<std::string>> client_data_list;
 
 std::deque<client_time_data> blocked_clients;
 
-client_time_data nearest_expired (std::deque<client_time_data> &blocked_clients) {
+std::deque<stream_cilent_blocked_element> stream_blocked_clients;
+
+std::deque<blocked_client> blocked_clients2;
+
+blocked_client nearest_expired()
+{
+    // check in list
+    blocked_client temp;
+    blocked_client temp_data;
+    temp_data.client_fd = -1;
+    //stream_cilent_blocked_element temp_stream;
+    //client_time_data temp_list;
+    /*if (blocked_clients.size() > 0)
+    {
+        temp_list = blocked_clients[0];
+        for (auto x:blocked_clients) {
+            if (x.has_expired && x.expired_time < temp_list.expired_time)
+            {
+                temp_list = x;
+            }
+        }
+        temp.client_fd = temp_list.client_fd;
+        temp.expired_time = temp_list.expired_time;
+        temp.type = 0;
+    }
+    if (stream_blocked_clients.size() > 0)
+    {
+        temp_stream = stream_blocked_clients[0];
+        for (auto x:stream_blocked_clients) {
+            if (x.expired_time < temp_stream.expired_time)
+            {
+                temp_stream = x;
+            }
+        }
+        if (blocked_clients.empty())
+        {
+            temp.client_fd = temp_stream.client_fd;
+            temp.expired_time = temp_stream.expired_time;
+            temp.type = 1;
+        }
+        else
+        {
+            if (temp_stream.expired_time < temp.expired_time)
+            {
+                temp.client_fd = temp_stream.client_fd;
+                temp.expired_time = temp_stream.expired_time;
+                temp.type = 1;
+            }
+        }
+    }*/
+    if (blocked_clients2.size() > 0)
+    {
+        temp_data = blocked_clients2[0];
+        for (auto x:blocked_clients2) {
+            if (x.expired_time < temp_data.expired_time)
+            {
+                temp_data = x;
+            }
+        }
+    }
+    return  temp_data;
+}
+
+client_time_data nearest_expired_fix (std::deque<client_time_data> &blocked_clients) {
     client_time_data temp;
     if (blocked_clients.size() > 0) {
         temp = blocked_clients[0];
@@ -72,21 +135,17 @@ client_time_data nearest_expired (std::deque<client_time_data> &blocked_clients)
     // if client_fd = -1, there are nothing to work
 }
 
-timeval change_time_to_timeval(client_time_data &time_need_change) {
-    if (time_need_change.has_expired) {
-        auto duration = time_need_change.expired_time - std::chrono::steady_clock::now();
-        long long mili_sec = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-        if (mili_sec <= 0) {
-            return{0,0};
-        }
-        else {
-            timeval temp;
-            temp.tv_sec = mili_sec/1'000'000;
-            temp.tv_usec = mili_sec%1'000'000;
-            return temp;
-        }
+timeval change_time_to_timeval(blocked_client &data)
+{
+    auto duration = data.expired_time - std::chrono::steady_clock::now();
+    long long mili_sec = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+    if (mili_sec <= 0) {
+        return{0,0};
     }
     else {
-        return {0,0};
+        timeval temp;
+        temp.tv_sec = mili_sec/1'000'000;
+        temp.tv_usec = mili_sec%1'000'000;
+        return temp;
     }
 }

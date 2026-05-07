@@ -48,9 +48,37 @@ struct StreamID {
         return sequence_number < other.sequence_number;
     }
 };
+
+struct stream_cilent_blocked_element
+{
+    int client_fd;
+    StreamID stream_id;
+    std::chrono::steady_clock::time_point expired_time;
+};
+
+
+// This is for all type of data list, stream,...
+struct blocked_client
+{
+    // TYPE desciption
+    // type = 0 : list data
+    // type = 1 : stream data
+
+    int client_fd;
+    size_t type;
+    std::chrono::steady_clock::time_point expired_time;
+
+    // If type = 1, there is addition property
+    StreamID stream_id;
+
+};
 extern std::unordered_map<std::string, std::map<StreamID,std::vector<std::pair<std::string, std::string>>>> stream_data;
 
 extern std::deque<client_time_data> blocked_clients;
+
+extern  std::deque<stream_cilent_blocked_element> stream_blocked_clients;
+
+extern  std::deque<blocked_client> blocked_clients2;
 
 extern std::unordered_map<std::string, data> client_data_string;
 
@@ -58,6 +86,6 @@ extern std::unordered_map<std::string,std::deque<std::string>> client_data_list;
 
 extern std::deque<client_time_data> client_expired_time;
 
-extern client_time_data nearest_expired(std::deque<client_time_data> &expired_clients);
-extern timeval change_time_to_timeval(client_time_data &time_need_change);
+extern blocked_client nearest_expired();
+extern timeval change_time_to_timeval(blocked_client &data);
 #endif //REDIS_STARTER_CPP_GLOBAL_H

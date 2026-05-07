@@ -200,28 +200,31 @@ void handle_lrange_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std
     }
 }
 
-void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd) {
+void handle_blpop_cmd(std::vector<std::string> &inp_arr, std::unordered_map<std::string,std::deque<std::string>> &client_data_list,int& client_fd)
+{
     size_t check = inp_arr.size();
     if (check == 3) {
         if (check_str_is_double(inp_arr[2]) && check_valid_varname(inp_arr[1])) {
             double blocking_time = std::stod(inp_arr[2]);
-            struct client_time_data temp_data;
+            //struct client_time_data temp_data;
+            blocked_client temp_data;
+            temp_data.type = 0;
             if (blocking_time == 0.0) {
                 temp_data.client_fd = client_fd;
-                temp_data.has_expired = false;
+                temp_data.expired_time = std::chrono::steady_clock::time_point::max();
             }
             else {
                 auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(blocking_time));
                 temp_data.client_fd = client_fd;
-                temp_data.has_expired = true;
+                //temp_data.has_expired = true;
                 temp_data.expired_time = std::chrono::steady_clock::now() + duration;
-                temp_data.expired_duration = blocking_time;
+                //temp_data.expired_duration = blocking_time;
             }
             if (client_data_list[inp_arr[1]].size() > 0) {
                 client_data_list[inp_arr[1]].pop_front();
             }
             else {
-                blocked_clients.push_back(temp_data);
+                blocked_clients2.push_back(temp_data);
             }
         }
         else {
