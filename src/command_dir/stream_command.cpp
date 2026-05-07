@@ -243,7 +243,7 @@ StreamID translate_start_end_xread(std::string value, std::string key_name)
     else
     {
         if (!stream_data[key_name].empty())
-            result = stream_data[key_name].rend()->first;
+            result = stream_data[key_name].rbegin()->first;
         else
         {
             result.stream_id = 0;
@@ -433,18 +433,27 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
 }
 
 void handle_blocked_stream_clients(std::vector<std::string> &inp_arr) {
-    for (auto x:blocked_clients2)
+    for (int i = 0; i < blocked_clients2.size();)
     {
-        if (x.type == 1)
+        if (blocked_clients2[i].type == 1)
         {
-            auto start_ptr = stream_data[x.stream_key].upper_bound(x.stream_id);
-            auto end_ptr = stream_data[x.stream_key].end();
+            auto start_ptr = stream_data[blocked_clients2[i].stream_key].upper_bound(blocked_clients2[i].stream_id);
+            auto end_ptr = stream_data[blocked_clients2[i].stream_key].end();
             std::string temp_data = build_output_from_map(start_ptr,end_ptr);
             if (temp_data != "*0\r\n")
             {
-                std::string result = "*1\r\n*2\r\n" + cstr_to_redis_str(x.stream_key) + temp_data;
-                send_resp_string(result.c_str(), x.client_fd);
+                std::string result = "*1\r\n*2\r\n" + cstr_to_redis_str(blocked_clients2[i].stream_key) + temp_data;
+                send_resp_string(result.c_str(), blocked_clients2[i].client_fd);
+                blocked_clients2.erase(blocked_clients2.begin() + i);
             }
+            else
+            {
+                i++;
+            }
+        }
+        else
+        {
+            i++;
         }
     }
 }
