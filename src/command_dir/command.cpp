@@ -154,33 +154,33 @@ void handleInput(const std::string &s, int& client_fd)
         }
         else if (key_word == "get") {
             std::cout << "Handle get command" << std::endl;
-            handle_get_cmd(inp_arr,client_data_string,client_fd);
+            handle_get_cmd(inp_arr,client_fd);
         }
         else if (key_word == "set") {
             std::cout << "Handle set command" << std::endl;
-            handle_set_cmd(inp_arr,client_data_string,client_fd);
+            handle_set_cmd(inp_arr,client_fd);
         }
         else if (key_word == "rpush") {
             std::cout << "Handle rpush command" << std::endl;
-            handle_rpush_cmd(inp_arr,client_data_list,client_fd);
+            handle_rpush_cmd(inp_arr,client_fd);
             handle_blocked_list_clients(inp_arr, 0,client_fd);
         }
         else if (key_word == "lpush") {
             std::cout << "Handle lpush command" << std::endl;
-            handle_lpush_cmd(inp_arr,client_data_list,client_fd);
+            handle_lpush_cmd(inp_arr,client_fd);
             handle_blocked_list_clients(inp_arr, 1,client_fd);
         }
         else if (key_word == "lrange") {
             std::cout << "Handle lrange command" << std::endl;
-            handle_lrange_cmd(inp_arr, client_data_list,client_fd);
+            handle_lrange_cmd(inp_arr,client_fd);
         }
         else if (key_word == "llen") {
             std::cout << "Handle llen command" << std::endl;
-            handle_llen_cmd(inp_arr, client_data_list,client_fd);
+            handle_llen_cmd(inp_arr,client_fd);
         }
         else if (key_word == "lpop") {
             std::cout << "Handle lpop command" << std::endl;
-            handle_lpop_cmd(inp_arr, client_data_list,client_fd);
+            handle_lpop_cmd(inp_arr,client_fd);
         }
         else if (key_word == "blpop") {
             std::cout << "Handle blpop command" << std::endl;
