@@ -385,30 +385,23 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                 if (result == "*0\r\n")
                 {
                     // blocking
+                    blocked_client temp;
+                    temp.stream_id = translate_start_end_xread(id,key);
+                    temp.client_fd = client_fd;
+                    temp.type = 1;
+                    temp.stream_key = key;
                     if (blocking_time == 0)
                     {
                         // Block forever
-                        blocked_client temp;
-                        temp.stream_id = translate_start_end_xread(id,key);
-                        temp.client_fd = client_fd;
-                        temp.type = 1;
-                        temp.stream_key = key;
                         temp.expired_time = std::chrono::steady_clock::time_point::max();
-                        blocked_clients.push_back(temp);
                     }
                     else
                     {
                         // Block for blocking_time
-                        blocked_client temp;
-                        temp.stream_id = translate_start_end_xread(id,key);
-                        temp.client_fd = client_fd;
-                        temp.type = 1;
-                        temp.stream_key = key;
-
                         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<uint64_t, std::milli>(blocking_time));
                         temp.expired_time = std::chrono::steady_clock::now() + duration;
-                        blocked_clients.push_back(temp);
                     }
+                    blocked_clients.push_back(temp);
                 }
                 else
                 {
@@ -435,11 +428,13 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
 void handle_blocked_stream_clients(std::vector<std::string> &inp_arr) {
     for (int i = 0; i < blocked_clients.size();)
     {
+        // type = 1 mean this is stream
         if (blocked_clients[i].type == 1)
         {
             auto start_ptr = stream_data[blocked_clients[i].stream_key].upper_bound(blocked_clients[i].stream_id);
             auto end_ptr = stream_data[blocked_clients[i].stream_key].end();
             std::string temp_data = build_output_from_map(start_ptr,end_ptr);
+            // temp_data != (empty array) that mean there is data to handle
             if (temp_data != "*0\r\n")
             {
                 std::string result = "*1\r\n*2\r\n" + cstr_to_redis_str(blocked_clients[i].stream_key) + temp_data;
