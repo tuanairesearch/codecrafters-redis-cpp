@@ -142,16 +142,16 @@ void Server::run() {
         }
         else if (retval == 0) {
             // Time out
-            for (int i = 0; i < blocked_clients2.size();) {
-                if (blocked_clients2[i].expired_time <= std::chrono::steady_clock::now()) {
-                    send_resp_string("*-1\r\n", blocked_clients2[i].client_fd);
+            for (int i = 0; i < blocked_clients.size();) {
+                if (blocked_clients[i].expired_time <= std::chrono::steady_clock::now()) {
+                    send_resp_string("*-1\r\n", blocked_clients[i].client_fd);
                     for (int j = 0; j < client_fds_.size();) {
-                        if (blocked_clients2[i].client_fd == client_fds_[j])
+                        if (blocked_clients[i].client_fd == client_fds_[j])
                             client_fds_.erase(client_fds_.begin()+j);
                         else
                             j++;
                     }
-                    blocked_clients2.erase(blocked_clients2.begin()+i);
+                    blocked_clients.erase(blocked_clients.begin()+i);
                 }
                 else {
                     i++;

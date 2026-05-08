@@ -75,11 +75,11 @@ struct blocked_client
 };
 extern std::unordered_map<std::string, std::map<StreamID,std::vector<std::pair<std::string, std::string>>>> stream_data;
 
-extern std::deque<client_time_data> blocked_clients;
+//extern std::deque<client_time_data> blocked_clients;
 
 extern  std::deque<stream_cilent_blocked_element> stream_blocked_clients;
 
-extern  std::deque<blocked_client> blocked_clients2;
+extern  std::deque<blocked_client> blocked_clients;
 
 extern std::unordered_map<std::string, data> client_data_string;
 

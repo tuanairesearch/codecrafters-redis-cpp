@@ -53,11 +53,11 @@ std::unordered_map<std::string, data> client_data_string;
  */
 std::unordered_map<std::string,std::deque<std::string>> client_data_list;
 
-std::deque<client_time_data> blocked_clients;
+//std::deque<client_time_data> blocked_clients;
 
 std::deque<stream_cilent_blocked_element> stream_blocked_clients;
 
-std::deque<blocked_client> blocked_clients2;
+std::deque<blocked_client> blocked_clients;
 
 blocked_client nearest_expired()
 {
@@ -65,50 +65,10 @@ blocked_client nearest_expired()
     blocked_client temp;
     blocked_client temp_data;
     temp_data.client_fd = -1;
-    //stream_cilent_blocked_element temp_stream;
-    //client_time_data temp_list;
-    /*if (blocked_clients.size() > 0)
+    if (blocked_clients.size() > 0)
     {
-        temp_list = blocked_clients[0];
+        temp_data = blocked_clients[0];
         for (auto x:blocked_clients) {
-            if (x.has_expired && x.expired_time < temp_list.expired_time)
-            {
-                temp_list = x;
-            }
-        }
-        temp.client_fd = temp_list.client_fd;
-        temp.expired_time = temp_list.expired_time;
-        temp.type = 0;
-    }
-    if (stream_blocked_clients.size() > 0)
-    {
-        temp_stream = stream_blocked_clients[0];
-        for (auto x:stream_blocked_clients) {
-            if (x.expired_time < temp_stream.expired_time)
-            {
-                temp_stream = x;
-            }
-        }
-        if (blocked_clients.empty())
-        {
-            temp.client_fd = temp_stream.client_fd;
-            temp.expired_time = temp_stream.expired_time;
-            temp.type = 1;
-        }
-        else
-        {
-            if (temp_stream.expired_time < temp.expired_time)
-            {
-                temp.client_fd = temp_stream.client_fd;
-                temp.expired_time = temp_stream.expired_time;
-                temp.type = 1;
-            }
-        }
-    }*/
-    if (blocked_clients2.size() > 0)
-    {
-        temp_data = blocked_clients2[0];
-        for (auto x:blocked_clients2) {
             if (x.expired_time < temp_data.expired_time)
             {
                 temp_data = x;

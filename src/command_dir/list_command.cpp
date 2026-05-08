@@ -225,7 +225,7 @@ void handle_blpop_cmd(std::vector<std::string> &inp_arr, int& client_fd)
                 client_data_list[inp_arr[1]].pop_front();
             }
             else {
-                blocked_clients2.push_back(temp_data);
+                blocked_clients.push_back(temp_data);
             }
         }
         else {
@@ -246,25 +246,25 @@ std::deque<std::string> two_str_to_list(std::string s1, std::string s2)
 }
 
 void handle_blocked_list_clients(std::vector<std::string> &inp_arr, int left_or_right, int &client_fd) {
-    for (int i = 0; i < blocked_clients2.size(); )
+    for (int i = 0; i < blocked_clients.size(); )
     {
-        if (blocked_clients2[i].type == 0 && client_data_list[inp_arr[1]].size() > 0)
+        if (blocked_clients[i].type == 0 && client_data_list[inp_arr[1]].size() > 0)
         {
             // left = 0, right = 1
             if (left_or_right == 0)
             {
                 auto result = two_str_to_list(inp_arr[1],client_data_list[inp_arr[1]].front());
-                send_resp_list(result,0,1,blocked_clients2[i].client_fd);
+                send_resp_list(result,0,1,blocked_clients[i].client_fd);
                 client_data_list[inp_arr[1]].pop_front();
-                blocked_clients2.erase(blocked_clients2.begin() + i);
+                blocked_clients.erase(blocked_clients.begin() + i);
 
             }
             else if (left_or_right == 1)
             {
                 auto result = two_str_to_list(inp_arr[1],*client_data_list[inp_arr[1]].rend());
-                send_resp_list(result,0,1,blocked_clients2[i].client_fd);
+                send_resp_list(result,0,1,blocked_clients[i].client_fd);
                 client_data_list[inp_arr[1]].pop_back();
-                blocked_clients2.erase(blocked_clients2.begin() + i);
+                blocked_clients.erase(blocked_clients.begin() + i);
             }
             else
             {

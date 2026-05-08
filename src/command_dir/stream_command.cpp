@@ -394,7 +394,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                         temp.type = 1;
                         temp.stream_key = key;
                         temp.expired_time = std::chrono::steady_clock::time_point::max();
-                        blocked_clients2.push_back(temp);
+                        blocked_clients.push_back(temp);
                     }
                     else
                     {
@@ -407,7 +407,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
 
                         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<uint64_t, std::milli>(blocking_time));
                         temp.expired_time = std::chrono::steady_clock::now() + duration;
-                        blocked_clients2.push_back(temp);
+                        blocked_clients.push_back(temp);
                     }
                 }
                 else
@@ -433,18 +433,18 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
 }
 
 void handle_blocked_stream_clients(std::vector<std::string> &inp_arr) {
-    for (int i = 0; i < blocked_clients2.size();)
+    for (int i = 0; i < blocked_clients.size();)
     {
-        if (blocked_clients2[i].type == 1)
+        if (blocked_clients[i].type == 1)
         {
-            auto start_ptr = stream_data[blocked_clients2[i].stream_key].upper_bound(blocked_clients2[i].stream_id);
-            auto end_ptr = stream_data[blocked_clients2[i].stream_key].end();
+            auto start_ptr = stream_data[blocked_clients[i].stream_key].upper_bound(blocked_clients[i].stream_id);
+            auto end_ptr = stream_data[blocked_clients[i].stream_key].end();
             std::string temp_data = build_output_from_map(start_ptr,end_ptr);
             if (temp_data != "*0\r\n")
             {
-                std::string result = "*1\r\n*2\r\n" + cstr_to_redis_str(blocked_clients2[i].stream_key) + temp_data;
-                send_resp_string(result.c_str(), blocked_clients2[i].client_fd);
-                blocked_clients2.erase(blocked_clients2.begin() + i);
+                std::string result = "*1\r\n*2\r\n" + cstr_to_redis_str(blocked_clients[i].stream_key) + temp_data;
+                send_resp_string(result.c_str(), blocked_clients[i].client_fd);
+                blocked_clients.erase(blocked_clients.begin() + i);
             }
             else
             {
