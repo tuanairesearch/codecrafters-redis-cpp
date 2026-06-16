@@ -131,7 +131,7 @@ std::string handle_rpush_cmd(std::vector<std::string> &inp_arr, int& client_fd) 
             }
             check = client_data_list[inp_arr[1]].size();
             //send_resp_int(check,client_fd);
-            return (":" + std::to_string(check) + "\r\n").c_str();
+            return (":" + std::to_string(check) + "\r\n");
         }
         else {
             //send_resp_string("-Invalid variable name. The name start with '_' or alphabet character.\r\n",client_fd);
@@ -274,7 +274,7 @@ std::deque<std::string> two_str_to_list(std::string s1, std::string s2)
     return my_list;
 }
 
-std::string handle_blocked_list_clients(std::vector<std::string> &inp_arr, int left_or_right, int &client_fd) {
+std::string handle_blocked_list_clients(std::vector<std::string> &inp_arr, int left_or_right) {
     for (int i = 0; i < blocked_clients.size(); )
     {
         if (blocked_clients[i].type == 0 && client_data_list[inp_arr[1]].size() > 0)
@@ -306,4 +306,5 @@ std::string handle_blocked_list_clients(std::vector<std::string> &inp_arr, int l
             i++;
         }
     }
+    return "";
 }

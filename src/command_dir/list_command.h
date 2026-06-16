@@ -21,7 +21,7 @@ std::string handle_llen_cmd(std::vector<std::string> &inp_arr, int& client_fd);
 std::string handle_lpop_cmd(std::vector<std::string> &inp_arr, int& client_fd);
 std::string handle_lrange_cmd(std::vector<std::string> &inp_arr, int& client_fd);
 std::string handle_blpop_cmd(std::vector<std::string> &inp_arr, int& client_fd);
-void handle_blocked_list_clients(std::vector<std::string> &inp_arr,int left_or_right, int &client_fd);
+void handle_blocked_list_clients(std::vector<std::string> &inp_arr,int left_or_right);
 //void handle_blocked_list_clients(std::vector<std::string> &inp_arr,
     //std::unordered_map<std::string,std::deque<std::string>> &client_data_list,std::deque<client_time_data> &blocked_clients);
 

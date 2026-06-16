@@ -183,12 +183,12 @@ std::string handleCMD(std::vector<std::string> &inp_arr, int& client_fd, std::st
         else if (key_word == "rpush") {
             std::cout << "Handle rpush command" << std::endl;
             respond = handle_rpush_cmd(inp_arr,client_fd);
-            handle_blocked_list_clients(inp_arr, 0,client_fd);
+            handle_blocked_list_clients(inp_arr, 0);
         }
         else if (key_word == "lpush") {
             std::cout << "Handle lpush command" << std::endl;
             respond = handle_lpush_cmd(inp_arr,client_fd);
-            handle_blocked_list_clients(inp_arr, 1,client_fd);
+            handle_blocked_list_clients(inp_arr, 1);
         }
         else if (key_word == "lrange") {
             std::cout << "Handle lrange command" << std::endl;
