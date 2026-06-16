@@ -52,6 +52,12 @@ void send_resp_string(std::string& s, int& client_fd) {
     //return s;
 }
 
+std::string str_to_resp_string(std::string s)
+{
+    std::string respond ="$" + std::to_string(s.length()) + "\r\n" + s + "\r\n";
+    return respond;
+}
+
 int translate_posion(const int& position, const int& number_of_element) {
     int value = position;
     if (position < 0) {
