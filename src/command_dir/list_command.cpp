@@ -252,6 +252,7 @@ std::string handle_blpop_cmd(std::vector<std::string> &inp_arr, int& client_fd)
             }
             else {
                 blocked_clients.push_back(temp_data);
+                return "";
             }
         }
         else {
