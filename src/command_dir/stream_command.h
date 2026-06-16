@@ -8,9 +8,9 @@
 #include <vector>
 #include "../global.h"
 std::string data_type_of(std::string var_name);
-void handle_type_cmd(std::vector<std::string> &inp_arr,int& client_fd);
-void handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd);
-void handle_xrange_cmd(std::vector<std::string> &inp_arr,int& client_fd);
-void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd);
-void handle_blocked_stream_clients(std::vector<std::string> &inp_arr);
+std::string handle_type_cmd(std::vector<std::string> &inp_arr,int& client_fd);
+std::string handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd);
+std::string handle_xrange_cmd(std::vector<std::string> &inp_arr,int& client_fd);
+std::string handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd);
+std::string handle_blocked_stream_clients(std::vector<std::string> &inp_arr);
 #endif //REDIS_STARTER_CPP_STREAM_COMMAND_H

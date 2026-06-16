@@ -6,7 +6,10 @@
 #include "./command.h"
 #include "../global.h"
 //#include <string>
-void handle_incr_cmd(std::vector<std::string> &inp_arr,int& client_fd)
+
+
+
+std::string handle_incr_cmd(std::vector<std::string> &inp_arr,int& client_fd)
 {
     // INCR <variable name>
     size_t check = inp_arr.size();
@@ -28,17 +31,19 @@ void handle_incr_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                 long long value = std::stoll(str_value);
                 value++;
                 client_data_string[inp_arr[1]].value = std::to_string(value);
-                send_resp_int(value,client_fd);
+                return ":" + std::to_string(value) + "\r\n";
             }
             else
             {
-                send_resp_string("-ERR value is not an integer or out of range\r\n",client_fd);
+                //resp_string("-ERR value is not an integer or out of range\r\n",client_fd);
+                return "-ERR value is not an integer or out of range\r\n";
             }
         }
         else
         {
             client_data_string[var_name].value = "1";
-            send_resp_int(1,client_fd);
+            //resp_int(1,client_fd);
+            return ":1\r\n";
         }
     }
     else
@@ -47,30 +52,48 @@ void handle_incr_cmd(std::vector<std::string> &inp_arr,int& client_fd)
     }
 }
 
-void handle_multi_cmd(std::vector<std::string> &inp_arr,int& client_fd)
+std::string handle_multi_cmd(std::vector<std::string> &inp_arr,int& client_fd)
 {
     if (inp_arr.size() == 1)
     {
         client_has_multi[client_fd] = true;
-        send_resp_string("+OK\r\n", client_fd);
+        //resp_string("+OK\r\n", client_fd);
+        return "+OK\r\n";
     }
     else
     {
-        send_resp_string("-Syntax error. Try MULTI\r\n", client_fd);
+        //resp_string("-Syntax error. Try MULTI\r\n", client_fd);
+        return "-Syntax error. Try MULTI\r\n";
     }
 }
 
-void handle_exec_cmd(std::vector<std::string> &inp_arr,int& client_fd)
+std::string handle_exec_cmd(std::vector<std::string> &inp_arr,int& client_fd)
 {
     if (inp_arr.size() == 1)
     {
-        if (client_has_multi[client_fd])
+        auto x = client_has_multi.find(client_fd);
+        std::vector <std::string> result;
+        if (x != client_has_multi.end())
         {
-
+            if (!multi_cmd_data[client_fd].empty())
+            {
+                for (auto val : multi_cmd_data[client_fd])
+                {
+                    auto inp_arr = val;
+                    std::string key_word = toLowerStr(inp_arr[0]);
+                    result.push_back(handleCMD(inp_arr,client_fd,key_word));
+                    return resp_vector_str(result,client_fd);
+                }
+            }
+            else
+            {
+                return "*0\r\n";
+            }
         }
         else
         {
-            send_resp_string("-ERR EXEC without MULTI\r\n", client_fd);
+            //send_resp_string("-ERR EXEC without MULTI\r\n", client_fd);
+            return "-ERR EXEC without MULTI\r\n";
         }
     }
 }

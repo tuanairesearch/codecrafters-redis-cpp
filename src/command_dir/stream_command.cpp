@@ -253,18 +253,20 @@ StreamID translate_start_end_xread(std::string value, std::string key_name)
     return result;
 }
 
-void handle_type_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
+std::string handle_type_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
     size_t check = inp_arr.size();
     if (check == 2) {
         std::string result = data_type_of(inp_arr[1]);
-        send_resp_string(("+" + result + "\r\n").c_str(),client_fd);
+        //resp_string(("+" + result + "\r\n").c_str(),client_fd);
+        return ("+" + result + "\r\n");
     }
     else {
-        send_resp_string("-Syntax error. Try TYPE <var_name>\r\n",client_fd);
+        //resp_string("-Syntax error. Try TYPE <var_name>\r\n",client_fd);
+        return "-Syntax error. Try TYPE <var_name>\r\n";
     }
 }
 
-void handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
+std::string handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
     size_t check = inp_arr.size();
     std::vector<std::pair<std::string, std::string>> arr;
     if (check >= 5 && check % 2 == 1) {
@@ -282,22 +284,26 @@ void handle_xadd_cmd(std::vector<std::string> &inp_arr,int& client_fd) {
         StreamID stream_id = make_id_seq(stream_name, key_value);
         if (stream_id.stream_id == 0 && stream_id.sequence_number == 0)
         {
-            send_resp_string("-ERR The ID specified in XADD must be greater than 0-0\r\n", client_fd);
+            //resp_string("-ERR The ID specified in XADD must be greater than 0-0\r\n", client_fd);
+            return "-ERR The ID specified in XADD must be greater than 0-0\r\n";
         }
         else if (stream_id.stream_id != -1)
         {
             stream_data[stream_name].insert({stream_id,arr});
             std::string message = std::to_string(stream_id.stream_id) + "-" + std::to_string(stream_id.sequence_number);
-            send_resp_string(message,client_fd);
+            //send_resp_string(message,client_fd);
+            return message;
         }
         else
         {
-            send_resp_string("-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n", client_fd);
+            //resp_string("-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n", client_fd);
+            return "-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n";
         }
     }
+    return "-1\r\n";
 }
 
-void handle_xrange_cmd(std::vector<std::string> &inp_arr,int& client_fd)
+std::string handle_xrange_cmd(std::vector<std::string> &inp_arr,int& client_fd)
 {
     size_t check = inp_arr.size();
     if (check == 4)
@@ -305,7 +311,8 @@ void handle_xrange_cmd(std::vector<std::string> &inp_arr,int& client_fd)
         std::string stream_name = inp_arr[1];
         if (stream_data[stream_name].empty())
         {
-            send_resp_string("*0\r\n", client_fd);
+            //resp_string("*0\r\n", client_fd);
+            return "*0\r\n";
         }
         else
         {
@@ -316,17 +323,20 @@ void handle_xrange_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                 auto start_ptr = stream_data[inp_arr[1]].lower_bound(start_id);
                 auto end_ptr = stream_data[inp_arr[1]].upper_bound(end_id);
                 std::string result = build_output_from_map(start_ptr, end_ptr);
-                send_resp_string(result.c_str(),client_fd);
+                //resp_string(result.c_str(),client_fd);
+                return result;
             }
             else
             {
-                send_resp_string("-Invalid range\r\n",client_fd);
+                //resp_string("-Invalid range\r\n",client_fd);
+                return "-Invalid range\r\n";
             }
         }
     }
+    return "-1\r\n";
 }
 
-void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
+std::string handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
 {
     size_t check = inp_arr.size();
     if (check % 2 == 0)
@@ -366,7 +376,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                 }
             }
             result = "*" + std::to_string(count) + "\r\n" + result;
-            send_resp_string(result.c_str(),client_fd);
+            return result;
         }
         else if ("block" == toLowerStr(inp_arr[1]) && check == 6)
         {
@@ -408,7 +418,8 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                 else
                 {
                     result = "*1\r\n*2\r\n" + cstr_to_redis_str(key) + result;
-                    send_resp_string(result.c_str(),client_fd);
+                    //resp_string(result.c_str(),client_fd);
+                    return result;
                 }
             }
             else
@@ -427,7 +438,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
     }
 }
 
-void handle_blocked_stream_clients(std::vector<std::string> &inp_arr) {
+std::string handle_blocked_stream_clients(std::vector<std::string> &inp_arr) {
     for (int i = 0; i < blocked_clients.size();)
     {
         // type = 1 mean this is stream
@@ -441,8 +452,9 @@ void handle_blocked_stream_clients(std::vector<std::string> &inp_arr) {
             if (temp_data != "*0\r\n")
             {
                 std::string result = "*1\r\n*2\r\n" + cstr_to_redis_str(blocked_clients[i].stream_key) + temp_data;
-                send_resp_string(result.c_str(), blocked_clients[i].client_fd);
+                //resp_string(result.c_str(), blocked_clients[i].client_fd);
                 blocked_clients.erase(blocked_clients.begin() + i);
+                return result;
             }
             else
             {

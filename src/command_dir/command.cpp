@@ -37,6 +37,11 @@ void send_resp_int(long long num, int& client_fd) {
     send(client_fd, s.c_str(), s.size(),0);
 }
 
+void send_resp_int(const char *message, int& client_fd) {
+    send(client_fd, message, strlen(message),0);
+    //return message;
+}
+
 void send_resp_string(const char *message, int& client_fd) {
     send(client_fd, message, strlen(message),0);
 }
@@ -44,6 +49,7 @@ void send_resp_string(const char *message, int& client_fd) {
 void send_resp_string(std::string& s, int& client_fd) {
     std::string respond ="$" + std::to_string(s.length()) + "\r\n" + s + "\r\n";
     send(client_fd,respond.c_str(),respond.size(),0);
+    //return s;
 }
 
 int translate_posion(const int& position, const int& number_of_element) {
@@ -59,7 +65,7 @@ int translate_posion(const int& position, const int& number_of_element) {
     return value;
 }
 
-void send_resp_list(std::deque<std::string>& my_list, int start_p, int end_p, int& client_fd) {
+std::string resp_list(std::deque<std::string>& my_list, int start_p, int end_p, int& client_fd) {
     int list_size = my_list.size();
     std::string respond ="";
     int start_position = translate_posion(start_p, list_size);
@@ -77,9 +83,20 @@ void send_resp_list(std::deque<std::string>& my_list, int start_p, int end_p, in
     else {
         respond = "*0\r\n";
     }
-    send(client_fd, respond.c_str(),respond.size(),0);
+    //send(client_fd, respond.c_str(),respond.size(),0);
+    return respond;
 }
 
+std::string resp_vector_str(std::vector<std::string> str_arr, int& client_fd)
+{
+    int arr_size = str_arr.size();
+    std::string respond = "*" + std::to_string(arr_size) + "\r\n";
+    for (auto x:str_arr)
+    {
+        respond += x;
+    }
+    return respond;
+}
 // --------- Checking system -----------------
 
 bool check_str_is_int(std::string s) {
@@ -127,16 +144,18 @@ bool check_valid_varname(std::string& name) {
 
 // ------------ Command for catching error -----------------
 
-void handle_unknown_cmd(int& client_fd) {
-    send_resp_string("-Unknown command\r\n", client_fd);
+std::string handle_unknown_cmd(int& client_fd) {
+    //resp_string("-Unknown command\r\n", client_fd);
+    return "-Unknown command\r\n";
 }
 
 
 // ------------  Input/Output logic -------------
 
-void handleCMD(std::vector<std::string> &inp_arr, int& client_fd, std::string command)
+std::string handleCMD(std::vector<std::string> &inp_arr, int& client_fd, std::string command)
 {
     std::string key_word = command;
+    std::string respond;
     if(key_word == "echo")
         {
             std::cout << "Handle echo command" << std::endl;
@@ -145,81 +164,86 @@ void handleCMD(std::vector<std::string> &inp_arr, int& client_fd, std::string co
         else if(key_word == "ping")
         {
             std::cout << "Handle ping command" << std::endl;
-            handle_ping_cmd(client_fd);
+            respond = handle_ping_cmd(client_fd);
         }
         else if (key_word == "get") {
             std::cout << "Handle get command" << std::endl;
-            handle_get_cmd(inp_arr,client_fd);
+            respond = handle_get_cmd(inp_arr,client_fd);
         }
         else if (key_word == "set") {
             std::cout << "Handle set command" << std::endl;
-            handle_set_cmd(inp_arr,client_fd);
+            respond = handle_set_cmd(inp_arr,client_fd);
         }
         else if (key_word == "rpush") {
             std::cout << "Handle rpush command" << std::endl;
-            handle_rpush_cmd(inp_arr,client_fd);
+            respond = handle_rpush_cmd(inp_arr,client_fd);
             handle_blocked_list_clients(inp_arr, 0,client_fd);
         }
         else if (key_word == "lpush") {
             std::cout << "Handle lpush command" << std::endl;
-            handle_lpush_cmd(inp_arr,client_fd);
+            respond = handle_lpush_cmd(inp_arr,client_fd);
             handle_blocked_list_clients(inp_arr, 1,client_fd);
         }
         else if (key_word == "lrange") {
             std::cout << "Handle lrange command" << std::endl;
-            handle_lrange_cmd(inp_arr,client_fd);
+            respond = handle_lrange_cmd(inp_arr,client_fd);
         }
         else if (key_word == "llen") {
             std::cout << "Handle llen command" << std::endl;
-            handle_llen_cmd(inp_arr,client_fd);
+            respond = handle_llen_cmd(inp_arr,client_fd);
         }
         else if (key_word == "lpop") {
             std::cout << "Handle lpop command" << std::endl;
-            handle_lpop_cmd(inp_arr,client_fd);
+            respond = handle_lpop_cmd(inp_arr,client_fd);
         }
         else if (key_word == "blpop") {
             std::cout << "Handle blpop command" << std::endl;
-            handle_blpop_cmd(inp_arr,client_fd);
+            respond = handle_blpop_cmd(inp_arr,client_fd);
         }
         else if (key_word == "type") {
             std::cout << "Handle type command" << std::endl;
-            handle_type_cmd(inp_arr,client_fd);
+            respond = handle_type_cmd(inp_arr,client_fd);
         }
         else if (key_word == "xadd") {
             std::cout << "Handle xadd command" << std::endl;
-            handle_xadd_cmd(inp_arr,client_fd);
+            respond = handle_xadd_cmd(inp_arr,client_fd);
             handle_blocked_stream_clients(inp_arr);
         }
         else if (key_word == "xrange")
         {
             std::cout << "Handle xrange command" << std::endl;
-            handle_xrange_cmd(inp_arr, client_fd);
+            respond = handle_xrange_cmd(inp_arr, client_fd);
         }
         else if (key_word == "xread")
         {
             std::cout << "Handle xread command" << std::endl;
-            handle_xread_cmd(inp_arr, client_fd);
+            respond = handle_xread_cmd(inp_arr, client_fd);
         }
         else if (key_word == "incr")
         {
             std::cout << "Handle incr command" << std::endl;
-            handle_incr_cmd(inp_arr, client_fd);
+            respond = handle_incr_cmd(inp_arr, client_fd);
         }
         else if (key_word == "multi")
         {
             std::cout << "Handle multi command" << std::endl;
-            handle_multi_cmd(inp_arr, client_fd);
+            respond = handle_multi_cmd(inp_arr, client_fd);
+        }
+        else if (key_word == "exec")
+        {
+            std::cout << "Handle exec command" << std::endl;
+            respond = handle_exec_cmd(inp_arr, client_fd);
         }
         else {
             std::cout << "Handle unkown command" << std::endl;
-            handle_unknown_cmd(client_fd);
+            respond = handle_unknown_cmd(client_fd);
         }
+    return respond;
 }
 
 
 void handleInput(const std::string &s, int& client_fd)
 {
-
     int str_pos = 0;
     std::vector<std::string> inp_arr; // Store user's input
 
@@ -232,14 +256,14 @@ void handleInput(const std::string &s, int& client_fd)
     {
         inp_arr = handleArray(s, str_pos);
         std::string key_word = toLowerStr(inp_arr[0]);
-        if (is_multi)
+        if (is_multi && key_word != "exec")
         {
             multi_cmd_data[client_fd].push_back(inp_arr);
             send_resp_string("+QUERED\r\n", client_fd);
         }
         else
         {
-            handleCMD(inp_arr,client_fd,key_word);
+            send_resp_string(handleCMD(inp_arr,client_fd,key_word).c_str(),client_fd);
         }
         std::cout << "Checked" << std::endl;
     }
