@@ -414,6 +414,7 @@ std::string handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                         temp.expired_time = std::chrono::steady_clock::now() + duration;
                     }
                     blocked_clients.push_back(temp);
+                    return "-1";
                 }
                 else
                 {
