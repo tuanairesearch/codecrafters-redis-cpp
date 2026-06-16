@@ -134,16 +134,10 @@ void handle_unknown_cmd(int& client_fd) {
 
 // ------------  Input/Output logic -------------
 
-void handleInput(const std::string &s, int& client_fd)
+void handleCMD(std::vector<std::string> &inp_arr, int& client_fd, std::string command)
 {
-    int str_pos = 0;
-    std::vector<std::string> inp_arr; // Store user's input
-    if(s[0] == '*')
-    {
-        //std::cout << "Check string arr" << std::endl;
-        inp_arr = handleArray(s, str_pos);
-        std::string key_word = toLowerStr(inp_arr[0]);
-        if(key_word == "echo")
+    std::string key_word = command;
+    if(key_word == "echo")
         {
             std::cout << "Handle echo command" << std::endl;
             handle_echo_cmd(inp_arr, client_fd);
@@ -211,9 +205,41 @@ void handleInput(const std::string &s, int& client_fd)
             std::cout << "Handle incr command" << std::endl;
             handle_incr_cmd(inp_arr, client_fd);
         }
+        else if (key_word == "multi")
+        {
+            std::cout << "Handle multi command" << std::endl;
+            handle_multi_cmd(inp_arr, client_fd);
+        }
         else {
             std::cout << "Handle unkown command" << std::endl;
             handle_unknown_cmd(client_fd);
+        }
+}
+
+
+void handleInput(const std::string &s, int& client_fd)
+{
+
+    int str_pos = 0;
+    std::vector<std::string> inp_arr; // Store user's input
+
+    // Check if this client turned multi
+    bool is_multi = false;
+    auto x = client_has_multi.find(client_fd);
+    if (x != client_has_multi.end())
+        is_multi = true;
+    if(s[0] == '*')
+    {
+        inp_arr = handleArray(s, str_pos);
+        std::string key_word = toLowerStr(inp_arr[0]);
+        if (is_multi)
+        {
+            multi_cmd_data[client_fd].push_back(inp_arr);
+            send_resp_string("+QUERED\r\n", client_fd);
+        }
+        else
+        {
+            handleCMD(inp_arr,client_fd,key_word);
         }
         std::cout << "Checked" << std::endl;
     }

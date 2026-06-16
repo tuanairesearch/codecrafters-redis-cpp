@@ -24,4 +24,9 @@ bool check_str_is_int(std::string s);
 bool check_str_is_double(std::string s);
 bool check_valid_varname(std::string& name);
 void handle_unknown_cmd(int& client_fd);
+
+// Helper
+// This function to command like GET, SET, ... in anyplace in program!
+void handleCMD(std::vector<std::string> &inp_arr, int& client_fd, std::string command);
+
 #endif //CODECRAFTERS_REDIS_CPP_COMMAND_H

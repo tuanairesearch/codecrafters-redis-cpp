@@ -45,5 +45,32 @@ void handle_incr_cmd(std::vector<std::string> &inp_arr,int& client_fd)
     {
         send_resp_string("-Syntax error. Please try again with INCR <variable name>\r\n", client_fd);
     }
+}
 
+void handle_multi_cmd(std::vector<std::string> &inp_arr,int& client_fd)
+{
+    if (inp_arr.size() == 1)
+    {
+        client_has_multi[client_fd] = true;
+        send_resp_string("+OK\r\n", client_fd);
+    }
+    else
+    {
+        send_resp_string("-Syntax error. Try MULTI\r\n", client_fd);
+    }
+}
+
+void handle_exec_cmd(std::vector<std::string> &inp_arr,int& client_fd)
+{
+    if (inp_arr.size() == 1)
+    {
+        if (client_has_multi[client_fd])
+        {
+
+        }
+        else
+        {
+            send_resp_string("-ERR EXEC without MULTI\r\n", client_fd);
+        }
+    }
 }

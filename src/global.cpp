@@ -65,6 +65,23 @@ std::deque<stream_cilent_blocked_element> stream_blocked_clients;
 
 std::deque<blocked_client> blocked_clients;
 
+std::unordered_map<int, bool> client_has_multi;
+
+// EXPLAIN ABOUT THIS DATA STRUCTURE WHICH STORE CMD FOR EACH CLIENT
+/*
+ *            client 1                    client 2               ...
+ *               |
+ *       vector<string array>
+ *     /                  \
+ *  string array 1     string array
+ *
+ *  example client 1 (number 4) has 1 command "SET name admin"
+ *  to get data from client 1: multi_cmd_data[4]    4 is client number
+ *  to get first command of client 1: multi_cmd_data[4][0] -> SET name admin
+ *  to get second string in first commend of client 1: multi_cmd_data[4][0][1]  -> name
+ */
+std::unordered_map<int,std::vector<std::vector<std::string>>> multi_cmd_data;
+
 blocked_client nearest_expired()
 {
     // check in list

@@ -87,6 +87,10 @@ extern std::unordered_map<std::string,std::deque<std::string>> client_data_list;
 
 extern std::deque<client_time_data> client_expired_time;
 
+extern std::unordered_map<int, bool> client_has_multi;
+
+extern  std::unordered_map<int,std::vector<std::vector<std::string>>> multi_cmd_data;
+
 extern blocked_client nearest_expired();
 extern timeval change_time_to_timeval(blocked_client &data);
 #endif //REDIS_STARTER_CPP_GLOBAL_H
