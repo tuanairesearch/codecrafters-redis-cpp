@@ -438,7 +438,7 @@ std::string handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
     }
 }
 
-std::string handle_blocked_stream_clients(std::vector<std::string> &inp_arr) {
+void handle_blocked_stream_clients(std::vector<std::string> &inp_arr) {
     for (int i = 0; i < blocked_clients.size();)
     {
         // type = 1 mean this is stream
@@ -452,9 +452,8 @@ std::string handle_blocked_stream_clients(std::vector<std::string> &inp_arr) {
             if (temp_data != "*0\r\n")
             {
                 std::string result = "*1\r\n*2\r\n" + cstr_to_redis_str(blocked_clients[i].stream_key) + temp_data;
-                //resp_string(result.c_str(), blocked_clients[i].client_fd);
+                send_resp_string(result.c_str(), blocked_clients[i].client_fd);
                 blocked_clients.erase(blocked_clients.begin() + i);
-                return result;
             }
             else
             {
