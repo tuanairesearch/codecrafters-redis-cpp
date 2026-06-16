@@ -341,6 +341,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
             // XREAD STREAM <key1> <key2> <key3> <id1> <id2> <id3>
             //                ^                    ^
             //                |--(arr_inpt - 2)/2--|
+
             std::vector<std::pair<std::string, std::string>> vector_result;
             size_t number_of_key = (check - 2)/2;
             std::pair<std::string, std::string> temp;
@@ -356,6 +357,7 @@ void handle_xread_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                 StreamID start_id = translate_start_end_xread(temp.second, temp.first);
                 auto start_ptr = stream_data[temp.first].upper_bound(start_id);
                 auto end_ptr = stream_data[temp.first].end();
+
                 std::string temp_data = build_output_from_map(start_ptr,end_ptr);
                 if (temp_data != "*0\r\n")
                 {
@@ -434,6 +436,7 @@ void handle_blocked_stream_clients(std::vector<std::string> &inp_arr) {
             auto start_ptr = stream_data[blocked_clients[i].stream_key].upper_bound(blocked_clients[i].stream_id);
             auto end_ptr = stream_data[blocked_clients[i].stream_key].end();
             std::string temp_data = build_output_from_map(start_ptr,end_ptr);
+
             // temp_data != (empty array) that mean there is data to handle
             if (temp_data != "*0\r\n")
             {

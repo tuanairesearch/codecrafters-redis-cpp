@@ -24,6 +24,8 @@
 
 std::unordered_map<std::string, std::map<StreamID,std::vector<std::pair<std::string, std::string>>>> stream_data;
 
+
+
 //*****************************************************************************************************************
 // Explain about how data store in client_data_string
 /*
@@ -36,9 +38,13 @@ std::unordered_map<std::string, std::map<StreamID,std::vector<std::pair<std::str
  *  We find data of var_name1 = "hi"
  *  client_data_string[4]["var_name1"] -> return "hi"
  */
-
+/*
+ * "data" data structure
+ * +) value
+ * +) has_expired
+ * +) expired_time
+ */
 std::unordered_map<std::string, data> client_data_string;
-
 
 // Explain about how data store in client_data_list
 /*

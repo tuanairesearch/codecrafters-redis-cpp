@@ -6,6 +6,7 @@
 #include "../resp_utls.h"
 #include "../global.h"
 #include "stream_command.h"
+#include "transaction_command.h"
 #include <string>
 #include <iostream>
 #include <vector>
@@ -204,6 +205,11 @@ void handleInput(const std::string &s, int& client_fd)
         {
             std::cout << "Handle xread command" << std::endl;
             handle_xread_cmd(inp_arr, client_fd);
+        }
+        else if (key_word == "incr")
+        {
+            std::cout << "Handle incr command" << std::endl;
+            handle_incr_cmd(inp_arr, client_fd);
         }
         else {
             std::cout << "Handle unkown command" << std::endl;
