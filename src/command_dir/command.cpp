@@ -265,7 +265,7 @@ void handleInput(const std::string &s, int& client_fd)
         if (is_multi && key_word != "exec")
         {
             multi_cmd_data[client_fd].push_back(inp_arr);
-            send_resp_string("+QUEED\r\n", client_fd);
+            send_resp_string("+QUEUED\r\n", client_fd);
         }
         else
         {
