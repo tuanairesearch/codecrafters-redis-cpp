@@ -165,7 +165,7 @@ std::string handleCMD(std::vector<std::string> &inp_arr, int& client_fd, std::st
     if(key_word == "echo")
         {
             std::cout << "Handle echo command" << std::endl;
-            handle_echo_cmd(inp_arr, client_fd);
+            respond = handle_echo_cmd(inp_arr, client_fd);
         }
         else if(key_word == "ping")
         {

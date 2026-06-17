@@ -19,10 +19,9 @@ std::string handle_echo_cmd(std::vector<std::string> &inp_arr, int& client_fd) {
     std::cout << inp_arr.size() << std::endl;
     std::cout << "-----------------------" << std::endl;
     if (inp_arr.size() == 2) {
-        std::string s = handleOutput(inp_arr[1]);
-        std::cout << "result = " << s << std::endl;
         //send_resp_string(s.c_str(),client_fd);
-        return s.c_str();
+        std::string result = inp_arr[1];
+        return str_to_resp_string(result);
     }
     else {
         //send_resp_string("-Missing field. Try \"echo <text>\"\r\n",client_fd);
