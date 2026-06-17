@@ -77,13 +77,17 @@ std::string handle_exec_cmd(std::vector<std::string> &inp_arr,int& client_fd)
         {
             if (!multi_cmd_data[client_fd].empty())
             {
+                std::string RESULT;
                 for (auto val : multi_cmd_data[client_fd])
                 {
                     auto inp_arr = val;
                     std::string key_word = toLowerStr(inp_arr[0]);
                     result.push_back(handleCMD(inp_arr,client_fd,key_word));
-                    return resp_vector_str(result,client_fd);
+                    // return RESULT;
                 }
+                RESULT = resp_vector_str(result,client_fd);
+                client_has_multi.erase(client_fd);
+                return RESULT;
             }
             else
             {
