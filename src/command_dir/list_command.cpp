@@ -200,10 +200,11 @@ std::string handle_lpop_cmd(std::vector<std::string> &inp_arr, int& client_fd) {
         }
 
         //resp_list(client_data_list[inp_arr[1]],0,number_element_remove - 1 ,client_fd);
-        return resp_list(client_data_list[inp_arr[1]],0,number_element_remove - 1 );
+        std::string result = resp_list(client_data_list[inp_arr[1]],0,number_element_remove - 1 );
         for (int i = 0; i < number_element_remove && client_data_list[inp_arr[1]].size() != 0;i++) {
             client_data_list[inp_arr[1]].pop_front();
         }
+        return result;
     }
 }
 
