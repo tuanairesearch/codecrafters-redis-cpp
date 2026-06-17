@@ -187,8 +187,9 @@ std::string handle_lpop_cmd(std::vector<std::string> &inp_arr, int& client_fd) {
     int number_element_remove;
     if (check == 2 && client_data_list[inp_arr[1]].size() != 0) {
         //send_resp_string(client_data_list[inp_arr[1]][0],client_fd);
+        auto result = client_data_list[inp_arr[1]].front();
         client_data_list[inp_arr[1]].pop_front();
-        return str_to_resp_string(client_data_list[inp_arr[1]][0]);
+        return str_to_resp_string(result);
         // CHECK BEHAVIOUR --------------------------------------------------------------------------------
     } else if (check == 3) {
         if (check_str_is_int(inp_arr[2])) {
@@ -206,6 +207,7 @@ std::string handle_lpop_cmd(std::vector<std::string> &inp_arr, int& client_fd) {
         }
         return result;
     }
+    return "$-1\r\n";
 }
 
 std::string handle_lrange_cmd(std::vector<std::string> &inp_arr, int& client_fd) {
