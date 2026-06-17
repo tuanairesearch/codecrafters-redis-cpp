@@ -19,7 +19,7 @@ std::string str_to_resp_string(std::string s);
 std::string resp_vector_str(std::vector<std::string> str_arr, int& client_fd);
 void send_resp_string(std::string& s, int& client_fd);
 void send_resp_string(const char *message, int& client_fd);
-std::string resp_list(std::deque<std::string>& my_list, int start_p, int end_p, int& client_fd);
+std::string resp_list(std::deque<std::string>& my_list, int start_p, int end_p);
 
 std::string handleOutput(std::string &s);
 int translate_posion(const int& position, const int& number_of_element);

@@ -200,7 +200,7 @@ std::string handle_lpop_cmd(std::vector<std::string> &inp_arr, int& client_fd) {
         }
 
         //resp_list(client_data_list[inp_arr[1]],0,number_element_remove - 1 ,client_fd);
-        return resp_list(client_data_list[inp_arr[1]],0,number_element_remove - 1 ,client_fd);
+        return resp_list(client_data_list[inp_arr[1]],0,number_element_remove - 1 );
         for (int i = 0; i < number_element_remove && client_data_list[inp_arr[1]].size() != 0;i++) {
             client_data_list[inp_arr[1]].pop_front();
         }
@@ -213,7 +213,7 @@ std::string handle_lrange_cmd(std::vector<std::string> &inp_arr, int& client_fd)
         if (check_str_is_int(inp_arr[2]) && check_str_is_int(inp_arr[3])) {
             int start_p = std::stoi(inp_arr[2]);
             int end_p = std::stoi(inp_arr[3]);
-            return resp_list(client_data_list[inp_arr[1]],start_p,end_p,client_fd);
+            return resp_list(client_data_list[inp_arr[1]],start_p,end_p);
         }
         else {
             //resp_string("-Syntax Error. Try LRANGE <var_name> <start> <stop>\r\n", client_fd);
@@ -274,7 +274,7 @@ std::deque<std::string> two_str_to_list(std::string s1, std::string s2)
     return my_list;
 }
 
-std::string handle_blocked_list_clients(std::vector<std::string> &inp_arr, int left_or_right) {
+void handle_blocked_list_clients(std::vector<std::string> &inp_arr, int left_or_right) {
     for (int i = 0; i < blocked_clients.size(); )
     {
         if (blocked_clients[i].type == 0 && client_data_list[inp_arr[1]].size() > 0)
@@ -285,7 +285,7 @@ std::string handle_blocked_list_clients(std::vector<std::string> &inp_arr, int l
                 auto result = two_str_to_list(inp_arr[1],client_data_list[inp_arr[1]].front());
                 client_data_list[inp_arr[1]].pop_front();
                 blocked_clients.erase(blocked_clients.begin() + i);
-                return resp_list(result,0,1,blocked_clients[i].client_fd);
+                send_resp_string(resp_list(result,0,1).c_str(), blocked_clients[i].client_fd);
 
             }
             else if (left_or_right == 1)
@@ -293,7 +293,7 @@ std::string handle_blocked_list_clients(std::vector<std::string> &inp_arr, int l
                 auto result = two_str_to_list(inp_arr[1],*client_data_list[inp_arr[1]].rend());
                 client_data_list[inp_arr[1]].pop_back();
                 blocked_clients.erase(blocked_clients.begin() + i);
-                return resp_list(result,0,1,blocked_clients[i].client_fd);
+                send_resp_string(resp_list(result,0,1).c_str(),blocked_clients[i].client_fd);
             }
             else
             {
@@ -306,5 +306,4 @@ std::string handle_blocked_list_clients(std::vector<std::string> &inp_arr, int l
             i++;
         }
     }
-    return "";
 }

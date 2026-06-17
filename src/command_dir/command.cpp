@@ -71,7 +71,7 @@ int translate_posion(const int& position, const int& number_of_element) {
     return value;
 }
 
-std::string resp_list(std::deque<std::string>& my_list, int start_p, int end_p, int& client_fd) {
+std::string resp_list(std::deque<std::string>& my_list, int start_p, int end_p) {
     int list_size = my_list.size();
     std::string respond ="";
     int start_position = translate_posion(start_p, list_size);
