@@ -75,6 +75,7 @@ std::string handle_exec_cmd(std::vector<std::string> &inp_arr,int& client_fd)
         std::vector <std::string> result;
         if (x != client_has_multi.end())
         {
+            client_has_multi.erase(client_fd);
             if (!multi_cmd_data[client_fd].empty())
             {
                 std::string RESULT;
@@ -86,7 +87,7 @@ std::string handle_exec_cmd(std::vector<std::string> &inp_arr,int& client_fd)
                     // return RESULT;
                 }
                 RESULT = resp_vector_str(result,client_fd);
-                client_has_multi.erase(client_fd);
+                multi_cmd_data.erase(client_fd);
                 return RESULT;
             }
             else
