@@ -188,7 +188,7 @@ std::string handle_lpop_cmd(std::vector<std::string> &inp_arr, int& client_fd) {
     if (check == 2 && client_data_list[inp_arr[1]].size() != 0) {
         //send_resp_string(client_data_list[inp_arr[1]][0],client_fd);
         client_data_list[inp_arr[1]].pop_front();
-        return client_data_list[inp_arr[1]][0];
+        return str_to_resp_string(client_data_list[inp_arr[1]][0]);
         // CHECK BEHAVIOUR --------------------------------------------------------------------------------
     } else if (check == 3) {
         if (check_str_is_int(inp_arr[2])) {
