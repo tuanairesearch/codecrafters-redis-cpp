@@ -102,3 +102,27 @@ std::string handle_exec_cmd(std::vector<std::string> &inp_arr,int& client_fd)
         }
     }
 }
+
+std::string handle_discard_cmd(std::vector<std::string> &inp_arr,int& client_fd)
+{
+    if (inp_arr.size() == 1)
+    {
+        if (client_has_multi.find(client_fd) != client_has_multi.end())
+        {
+            if (multi_cmd_data.find(client_fd) != multi_cmd_data.end())
+            {
+                multi_cmd_data.erase(client_fd);
+            }
+            client_has_multi.erase(client_fd);
+            return "+OK\r\n";
+        }
+        else
+        {
+            return "-ERR DISCARD without MULTI\r\n";
+        }
+    }
+    else
+    {
+        return "";
+    }
+}

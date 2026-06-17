@@ -240,6 +240,11 @@ std::string handleCMD(std::vector<std::string> &inp_arr, int& client_fd, std::st
             std::cout << "Handle exec command" << std::endl;
             respond = handle_exec_cmd(inp_arr, client_fd);
         }
+        else if (key_word == "discard")
+        {
+            std::cout << "Handle discard command" << std::endl;
+            respond = handle_discard_cmd(inp_arr, client_fd);
+        }
         else {
             std::cout << "Handle unkown command" << std::endl;
             respond = handle_unknown_cmd(client_fd);
@@ -262,7 +267,7 @@ void handleInput(const std::string &s, int& client_fd)
     {
         inp_arr = handleArray(s, str_pos);
         std::string key_word = toLowerStr(inp_arr[0]);
-        if (is_multi && key_word != "exec")
+        if (is_multi && key_word != "exec" && key_word != "discard")
         {
             multi_cmd_data[client_fd].push_back(inp_arr);
             send_resp_string("+QUEUED\r\n", client_fd);
