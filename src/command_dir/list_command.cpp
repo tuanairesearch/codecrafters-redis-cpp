@@ -284,16 +284,17 @@ void handle_blocked_list_clients(std::vector<std::string> &inp_arr, int left_or_
             {
                 auto result = two_str_to_list(inp_arr[1],client_data_list[inp_arr[1]].front());
                 client_data_list[inp_arr[1]].pop_front();
+                auto x = resp_list(result,0,1);
+                send_resp_string(x.c_str(), blocked_clients[i].client_fd);
                 blocked_clients.erase(blocked_clients.begin() + i);
-                send_resp_string(resp_list(result,0,1).c_str(), blocked_clients[i].client_fd);
 
             }
             else if (left_or_right == 1)
             {
                 auto result = two_str_to_list(inp_arr[1],*client_data_list[inp_arr[1]].rend());
                 client_data_list[inp_arr[1]].pop_back();
-                blocked_clients.erase(blocked_clients.begin() + i);
                 send_resp_string(resp_list(result,0,1).c_str(),blocked_clients[i].client_fd);
+                blocked_clients.erase(blocked_clients.begin() + i);
             }
             else
             {
