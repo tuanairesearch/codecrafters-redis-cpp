@@ -28,6 +28,8 @@ add_executable(redis ${SOURCE_FILES}
         src/command_dir/stream_command.h
         src/command_dir/transaction_command.cpp
         src/command_dir/transaction_command.h
+        src/command_dir/replication_command.cpp
+        src/command_dir/replication_command.h
 )
 
 #target_link_libraries(redis PRIVATE asio asio::asio)

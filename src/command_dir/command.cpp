@@ -6,6 +6,7 @@
 #include "../resp_utls.h"
 #include "../global.h"
 #include "stream_command.h"
+#include "replication_command.h"
 #include "transaction_command.h"
 #include <string>
 #include <iostream>
