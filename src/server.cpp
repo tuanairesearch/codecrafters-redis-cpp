@@ -55,7 +55,7 @@ void Server::init() {
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(6379);
+    server_addr.sin_port = htons(port_);
 
     if (bind(server_fd_, (struct sockaddr *)&server_addr,
         sizeof(server_addr)) != 0)
